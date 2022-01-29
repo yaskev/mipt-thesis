@@ -1,0 +1,11 @@
+{
+  "optionAvgType": "arithmetic",
+  "optionType": "call",
+  "riskFreeRate": 0.05,
+  "volatility": 0.2,
+  "initialSpotPrice": 100,
+  "strike": 110,
+  "timeToMaturity": 1,
+  "numberOfPaths": 10,
+  "numberOfSteps": 365
+}
