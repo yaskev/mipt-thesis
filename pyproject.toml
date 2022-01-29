@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "mipt-thesis"
+version = "0.1.0"
+description = "Bachelor thesis at MIPT"
+authors = ["Aleksandr Yaskevich <yaskevas@yandex.ru>"]
+license = "Apache-2.0"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
