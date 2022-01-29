@@ -9,15 +9,20 @@ class PathGenerator:
         with open('settings.json') as f:
             self.params = json.loads(f.read())
 
-    def generate_paths(self) -> np.ndarray:
+    def generate_paths(self,
+                       spot_price: float,
+                       ttm: float,
+                       risk_free_rate: float,
+                       volatility: float
+                       ) -> np.ndarray:
         paths = self._get_standard_normal(num_of_values=self.params['numberOfPaths'],
                                           num_of_steps=self.params['numberOfSteps'] + 1)
-        paths[:, 0] = self.params['initialSpotPrice']
-        dt = self.params['timeToMaturity'] / self.params['numberOfSteps']
+        paths[:, 0] = spot_price
+        dt = ttm / self.params['numberOfSteps']
         for i in range(self.params['numberOfSteps']):
-            paths[:, i + 1] = (paths[:, i] * np.exp((self.params['riskFreeRate']
-                                                     - 0.5 * self.params['volatility'] ** 2) * dt
-                                                    + self.params['volatility']
+            paths[:, i + 1] = (paths[:, i] * np.exp((risk_free_rate
+                                                     - 0.5 * volatility ** 2) * dt
+                                                    + volatility
                                                     * np.sqrt(dt) * paths[:, i + 1]))
         return paths
 
