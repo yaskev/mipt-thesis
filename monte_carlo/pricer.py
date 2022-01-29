@@ -18,9 +18,9 @@ def get_option_price(paths: np.ndarray,
         raise Exception(f'Unknown averaging type: {avg_type.value}')
 
     if option_type == OptionType.CALL:
-        payoffs = strike - mean
-    elif option_type == OptionType.PUT:
         payoffs = mean - strike
+    elif option_type == OptionType.PUT:
+        payoffs = strike - mean
     else:
         raise Exception(f'Unknown option type: {option_type.value}')
     payoffs[payoffs < 0] = 0
