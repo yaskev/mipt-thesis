@@ -5,23 +5,21 @@ import numpy as np
 from settings import NUMBER_OF_PATHS, NUMBER_OF_STEPS
 
 
-def generate_paths(spot_price: float,
-                   ttm: float,
+def generate_paths(ttm: float,
                    risk_free_rate: float,
                    volatility: float
                    ) -> np.ndarray:
     normal_samples = _get_standard_normal(num_of_values=NUMBER_OF_PATHS,
                                           num_of_steps=NUMBER_OF_STEPS + 1)
-    return create_paths(ttm, spot_price, normal_samples, risk_free_rate, volatility)
+    return create_paths(ttm, normal_samples, risk_free_rate, volatility)
 
 
 @njit(fastmath=True)
 def create_paths(ttm: float,
-                 spot_price: float,
                  paths: np.ndarray,
                  risk_free_rate: float,
                  volatility: float):
-    paths[:, 0] = spot_price
+    paths[:, 0] = 1
     dt = ttm / NUMBER_OF_STEPS
     for i in range(NUMBER_OF_STEPS):
         paths[:, i + 1] = (paths[:, i] * np.exp((risk_free_rate
