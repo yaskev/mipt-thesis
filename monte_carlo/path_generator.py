@@ -2,7 +2,7 @@ from numba import njit
 from numpy.random import default_rng
 import numpy as np
 
-from settings import NUMBER_OF_PATHS, NUMBER_OF_STEPS
+from settings import NUMBER_OF_PATHS, NUMBER_OF_STEPS, USE_ANTITHETIC_VARIATES, PATH_RANDOM_SEED
 
 
 def generate_paths(ttm: float,
@@ -11,6 +11,8 @@ def generate_paths(ttm: float,
                    ) -> np.ndarray:
     normal_samples = _get_standard_normal(num_of_values=NUMBER_OF_PATHS,
                                           num_of_steps=NUMBER_OF_STEPS + 1)
+    if USE_ANTITHETIC_VARIATES:
+        normal_samples = np.append(normal_samples, -normal_samples, axis=0)
     return create_paths(ttm, normal_samples, risk_free_rate, volatility)
 
 
@@ -31,7 +33,7 @@ def create_paths(ttm: float,
 
 def _get_standard_normal(num_of_values: int,
                          num_of_steps: int) -> np.ndarray:
-    rng = default_rng()
+    rng = default_rng(PATH_RANDOM_SEED)
     values = rng.standard_normal((num_of_values, num_of_steps))
     mean = values.mean(axis=0)
     std = values.std(axis=0)

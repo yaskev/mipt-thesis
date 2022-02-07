@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 from scipy.stats import norm
 
-import settings
+from settings import USE_ANTITHETIC_VARIATES, NUMBER_OF_PATHS, CONFIDENCE_INTERVAL
 from utils.typing import OptionAvgType
 
 
@@ -23,9 +23,12 @@ def get_option_price_and_ci(paths: np.ndarray,
     payoffs = mean - strike_spot_ratio
     payoffs[payoffs < 0] = 0
 
+    if USE_ANTITHETIC_VARIATES:
+        payoffs = (payoffs[:NUMBER_OF_PATHS] + payoffs[NUMBER_OF_PATHS:]) / 2
+
     payoff_mean = np.exp(-risk_free_rate * ttm) * payoffs.mean()
     payoff_std = np.exp(-risk_free_rate * ttm) * payoffs.std()
-    ci_multiplier = norm.ppf((1 + settings.CONFIDENCE_INTERVAL) / 2)
+    ci_multiplier = norm.ppf((1 + CONFIDENCE_INTERVAL) / 2)
     return (payoff_mean,
-            max(payoff_mean - payoff_std * ci_multiplier / np.sqrt(settings.NUMBER_OF_PATHS), 0),
-            payoff_mean + payoff_std * ci_multiplier / np.sqrt(settings.NUMBER_OF_PATHS))
+            max(payoff_mean - payoff_std * ci_multiplier / np.sqrt(NUMBER_OF_PATHS), 0),
+            payoff_mean + payoff_std * ci_multiplier / np.sqrt(NUMBER_OF_PATHS))

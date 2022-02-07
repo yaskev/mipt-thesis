@@ -3,13 +3,14 @@ from typing import Tuple
 import pandas as pd
 from numpy.random import default_rng
 
+from settings import OPTIONS_PARAMS_RANDOM_SEED
 from .path_generator import generate_paths
 from .pricer import get_option_price_and_ci
 from utils.typing import OptionAvgType
 
 
 def create_dataset(entries_cnt: int) -> pd.DataFrame:
-    rng = default_rng()
+    rng = default_rng(OPTIONS_PARAMS_RANDOM_SEED)
     data = {
         'strike_spot_ratio': 0.5 + rng.random(entries_cnt) * 1.5,
         'ttm': 0.5 + rng.random(entries_cnt) * 1,
