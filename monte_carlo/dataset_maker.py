@@ -12,7 +12,7 @@ from utils.typing import OptionAvgType
 def create_dataset(entries_cnt: int) -> pd.DataFrame:
     rng = default_rng(OPTIONS_PARAMS_RANDOM_SEED)
     data = {
-        'strike_spot_ratio': 0.5 + rng.random(entries_cnt) * 1.5,
+        'spot_strike_ratio': 0.5 + rng.random(entries_cnt) * 1.5,
         'ttm': 0.5 + rng.random(entries_cnt) * 1,
         'risk_free_rate': 0 + rng.random(entries_cnt) * 0.1,
         'volatility': 0.05 + rng.random(entries_cnt) * 0.5,
@@ -26,6 +26,6 @@ def create_dataset(entries_cnt: int) -> pd.DataFrame:
 
 
 def _get_price(row) -> Tuple[float, float, float]:
-    paths = generate_paths(row.ttm, row.risk_free_rate, row.volatility)
-    return get_option_price_and_ci(paths, row.strike_spot_ratio, row.risk_free_rate, row.ttm,
+    paths = generate_paths(row.ttm, row.risk_free_rate, row.volatility, row.spot_strike_ratio)
+    return get_option_price_and_ci(paths, row.risk_free_rate, row.ttm,
                                    OptionAvgType(row.avg_type))

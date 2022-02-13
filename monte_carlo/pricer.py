@@ -8,7 +8,6 @@ from utils.typing import OptionAvgType
 
 
 def get_option_price_and_ci(paths: np.ndarray,
-                            strike_spot_ratio: float,
                             risk_free_rate: float,
                             ttm: float,
                             avg_type: OptionAvgType
@@ -20,7 +19,7 @@ def get_option_price_and_ci(paths: np.ndarray,
     else:
         raise Exception(f'Unknown averaging type: {avg_type.value}')
 
-    payoffs = mean - strike_spot_ratio
+    payoffs = mean - 1
     payoffs[payoffs < 0] = 0
 
     if USE_ANTITHETIC_VARIATES:
