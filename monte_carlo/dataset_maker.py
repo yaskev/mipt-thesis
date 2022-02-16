@@ -21,7 +21,7 @@ def create_dataset(entries_cnt: int) -> pd.DataFrame:
     }
     df = pd.DataFrame(data=data)
     price_and_ci_df = df.apply(_get_price, axis=1, result_type='expand')
-    price_and_ci_df.columns = ['price', 'left_ci', 'right_ci']
+    price_and_ci_df.columns = ['price_strike_ratio', 'left_ci', 'right_ci']
     return pd.concat([df, price_and_ci_df], axis=1)
 
 
