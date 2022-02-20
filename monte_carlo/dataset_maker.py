@@ -14,7 +14,7 @@ def create_dataset(entries_cnt: int) -> pd.DataFrame:
     data = {
         'spot_strike_ratio': 0.5 + rng.random(entries_cnt) * 1.5,
         'ttm': 0.5 + rng.random(entries_cnt) * 1,
-        'risk_free_rate': 0 + rng.random(entries_cnt) * 0.1,
+        'risk_free_rate': 0 + rng.random(entries_cnt) * 0.2,
         'volatility': 0.05 + rng.random(entries_cnt) * 0.5,
         'avg_type': [OptionAvgType.ARITHMETIC.value if rng.random() >= 0.5 else OptionAvgType.GEOMETRIC.value
                      for _ in range(entries_cnt)],
