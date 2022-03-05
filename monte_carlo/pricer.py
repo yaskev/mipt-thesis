@@ -8,9 +8,9 @@ from utils.typing import OptionAvgType
 
 
 def get_option_price_and_ci(paths: np.ndarray,
-                            ttm: float,
                             risk_free_rate: float,
-                            avg_type: OptionAvgType
+                            avg_type: OptionAvgType,
+                            ttm: float,
                             ) -> Tuple[float, float, float]:
     if avg_type == OptionAvgType.ARITHMETIC:
         mean = paths.mean(axis=1)

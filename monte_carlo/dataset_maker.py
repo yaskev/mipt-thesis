@@ -13,8 +13,7 @@ def create_dataset(entries_cnt: int) -> pd.DataFrame:
     rng = default_rng(OPTIONS_PARAMS_RANDOM_SEED)
     data = {
         'spot_strike_ratio': 0.5 + rng.random(entries_cnt) * 1.5,
-        # 'ttm': 0.5 + rng.random(entries_cnt) * 1,
-        'ttm': 1,
+        'ttm': 0.5 + rng.random(entries_cnt) * 1,
         'risk_free_rate': 0 + rng.random(entries_cnt) * 0.2,
         'volatility': 0.05 + rng.random(entries_cnt) * 0.5,
         'avg_type': [OptionAvgType.ARITHMETIC.value if rng.random() >= 0.5 else OptionAvgType.GEOMETRIC.value
@@ -28,5 +27,5 @@ def create_dataset(entries_cnt: int) -> pd.DataFrame:
 
 def _get_price(row) -> Tuple[float, float, float]:
     paths = generate_paths(row.ttm, row.risk_free_rate, row.volatility, row.spot_strike_ratio)
-    return get_option_price_and_ci(paths, row.risk_free_rate, row.ttm,
-                                   OptionAvgType(row.avg_type))
+    return get_option_price_and_ci(paths, row.risk_free_rate,
+                                   OptionAvgType(row.avg_type), row.ttm)

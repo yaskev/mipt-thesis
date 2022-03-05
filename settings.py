@@ -1,7 +1,7 @@
 from utils.typing import OptionAvgType
 
 # Launch Monte Carlo or not
-USE_DATA_FROM_FILE = False
+USE_DATA_FROM_FILE = True
 
 # Monte Carlo parameters
 NUMBER_OF_PATHS = 100

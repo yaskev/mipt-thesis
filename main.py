@@ -25,7 +25,7 @@ def make_predicted_df(fixed_avg_type: OptionAvgType = None):
 
 if __name__ == '__main__':
     if USE_DATA_FROM_FILE:
-        df = pd.read_csv('options_prices.csv')
+        df = pd.read_csv('monte_carlo_prices.csv')
     else:
         df = create_dataset(DATASET_SIZE)
         df.to_csv('options_prices.csv', index=False, float_format='%.4f')
