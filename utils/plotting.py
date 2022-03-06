@@ -36,3 +36,19 @@ def plot_different_metrics(metrics: Dict[str, List[float]], dataset_sizes: List[
     plt.title(metric_name.capitalize(), fontsize=18)
     plt.legend()
     plt.savefig(strict_path)
+
+
+def plot_loss_comparison(loss_cmp: Dict[int, Dict[str, List[float]]], strict_path: str):
+    for dataset_size, loss_dict in loss_cmp.items():
+        plt.figure(figsize=(8, 6))
+
+        for name, loss in loss_dict.items():
+            plt.plot(np.arange(len(loss)), loss, label=name)
+
+        plt.xlabel('Epoch number')
+        plt.ylabel('Loss')
+        plt.yscale('log')
+        plt.grid()
+        plt.title(f'Loss, dataset size={dataset_size}', fontsize=18)
+        plt.legend()
+        plt.savefig(os.path.join(strict_path, f'{dataset_size}.jpg'))
