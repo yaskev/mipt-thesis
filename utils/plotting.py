@@ -5,6 +5,8 @@ from typing import List, Dict
 import numpy as np
 from matplotlib import pyplot as plt
 
+from settings import NUMBER_OF_STEPS
+
 
 def create_chart(train_loss: List[float], val_loss: List[float], folder: str, strict_path: str = None):
     plt.figure(figsize=(8, 6))
@@ -52,3 +54,17 @@ def plot_loss_comparison(loss_cmp: Dict[int, Dict[str, List[float]]], strict_pat
         plt.title(f'Loss, dataset size={dataset_size}', fontsize=18)
         plt.legend()
         plt.savefig(os.path.join(strict_path, f'{dataset_size}.jpg'))
+
+
+def plot_many_paths(paths: np.ndarray, strict_path: str):
+    plt.figure(figsize=(8, 6))
+
+    for one_path in paths:
+        plt.plot(np.arange(NUMBER_OF_STEPS + 1), one_path)
+
+    plt.xlabel('Step')
+    plt.ylabel('Price')
+    plt.yscale('log')
+    plt.grid()
+    plt.title('Paths, scale=log', fontsize=18)
+    plt.savefig(os.path.join(strict_path, f'{datetime.now()}.jpg'))

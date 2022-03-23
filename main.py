@@ -1,9 +1,10 @@
 import pandas as pd
 
 from monte_carlo import create_dataset
+from monte_carlo.path_generator import plot_paths
 from positive_network.net_maker import get_trained_net_and_test_set as get_positive_net_and_test_set
 from convex_network.net_maker import get_trained_net_and_test_set as get_convex_net_and_test_set
-from settings import USE_DATA_FROM_FILE, DATASET_SIZE, USE_CONVEX_NETWORK, FIXED_AVG_TYPE
+from settings import USE_DATA_FROM_FILE, DATASET_SIZE, USE_CONVEX_NETWORK, FIXED_AVG_TYPE, PLOT_SOME_PATHS
 from utils.typing import OptionAvgType
 
 
@@ -29,6 +30,9 @@ if __name__ == '__main__':
     else:
         df = create_dataset(DATASET_SIZE)
         df.to_csv('options_prices.csv', index=False, float_format='%.4f')
+
+    if PLOT_SOME_PATHS:
+        plot_paths(df.iloc[:5, :])
 
     if USE_CONVEX_NETWORK:
         net, x_test, y_test = get_convex_net_and_test_set(df, test_size=0.1, fixed_avg_type=FIXED_AVG_TYPE)

@@ -8,6 +8,7 @@ NUMBER_OF_PATHS = 100
 NUMBER_OF_STEPS = 365
 CONFIDENCE_INTERVAL = 0.95
 USE_ANTITHETIC_VARIATES = True
+PLOT_SOME_PATHS = False
 
 # Random number generator seeds
 PATH_RANDOM_SEED = 42  # Set None not to fix seed

@@ -1,8 +1,11 @@
+import pandas as pd
 from numba import njit
 from numpy.random import default_rng
 import numpy as np
+import matplotlib.pyplot as plt
 
 from settings import NUMBER_OF_PATHS, NUMBER_OF_STEPS, USE_ANTITHETIC_VARIATES, PATH_RANDOM_SEED
+from utils.plotting import plot_many_paths
 
 
 def generate_paths(ttm: float,
@@ -40,3 +43,9 @@ def _get_standard_normal(num_of_values: int,
     mean = values.mean(axis=0)
     std = values.std(axis=0)
     return (values - mean) / std
+
+
+def plot_paths(dataset: pd.DataFrame, folder: str = 'monte_carlo/charts'):
+    for i, row in dataset.iterrows():
+        paths = generate_paths(row['ttm'], row['risk_free_rate'], row['volatility'], row['spot_strike_ratio'])
+        plot_many_paths(paths, folder)
