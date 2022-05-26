@@ -22,7 +22,7 @@ if __name__ == '__main__':
     #
     # df.to_csv('../fixed_params_dataset.csv', index=False, float_format='%.4f')
 
-    df = pd.read_csv('../fixed_convex_net_prices.csv')
+    df = pd.read_csv('../specific_datasets/fixed_convex_net_prices.csv')
 
     df.sort_values('spot_strike_ratio', inplace=True)
 
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     plt.text(0.61, 0.21, 'Avg = Arithmetic', fontsize=20)
     plt.grid()
     plt.plot(df['spot_strike_ratio'], df['net_price'], linewidth=2)
-    plt.title('Price by spot, positive net', fontsize=20)
+    plt.title('Price by spot, convex net', fontsize=20)
     plt.xlabel('Spot to strike ratio', fontsize=18)
     plt.ylabel('Price to strike ratio', fontsize=18)
     plt.savefig('convexity_convex_net.jpg')

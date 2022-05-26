@@ -4,7 +4,7 @@ from monte_carlo import create_dataset
 from monte_carlo.path_generator import plot_paths
 from positive_network.net_maker import get_trained_net_and_test_set as get_positive_net_and_test_set
 from convex_network.net_maker import get_trained_net_and_test_set as get_convex_net_and_test_set
-from settings import USE_DATA_FROM_FILE, DATASET_SIZE, USE_CONVEX_NETWORK, FIXED_AVG_TYPE, PLOT_SOME_PATHS
+from settings import USE_DATA_FROM_FILE, DATASET_SIZE, USE_CONVEX_NETWORK, FIXED_AVG_TYPE, PLOT_SOME_PATHS, CALC_GREEKS
 from utils.typing import OptionAvgType
 
 
@@ -26,7 +26,7 @@ def make_predicted_df(fixed_avg_type: OptionAvgType = None):
 
 if __name__ == '__main__':
     if USE_DATA_FROM_FILE:
-        df = pd.read_csv('monte_carlo_prices.csv')
+        df = pd.read_csv('monte_carlo_prices.csv').iloc[:500, :]
     else:
         df = create_dataset(DATASET_SIZE)
         df.to_csv('options_prices.csv', index=False, float_format='%.4f')
@@ -44,5 +44,10 @@ if __name__ == '__main__':
     df_test = make_predicted_df(fixed_avg_type=FIXED_AVG_TYPE)
     df_test.to_csv('convex_net_prices.csv' if USE_CONVEX_NETWORK else 'pos_net_prices.csv', index=False,
                    float_format='%.4f')
-
     print(f'MSE: {((y_test - predict_price) ** 2).mean()}')
+
+    if CALC_GREEKS:
+        greeks = net.get_greeks(x_test)
+        full_df = pd.concat([df_test, greeks], axis=1)
+        full_df.to_csv('convex_net_greeks.csv' if USE_CONVEX_NETWORK else 'pos_net_greeks.csv', index=False,
+                       float_format='%.4f')
