@@ -7,7 +7,8 @@ from utils.plotting import create_chart
 from utils.typing import OptionAvgType
 
 
-def get_trained_net_and_test_set(df: pd.DataFrame, test_size: float, fixed_avg_type: OptionAvgType = None, analytics_mode: bool = False):
+def get_trained_net_and_test_set(df: pd.DataFrame, test_size: float, fixed_avg_type: OptionAvgType = None,
+                                 analytics_mode: bool = False, no_charts: bool = False):
     if fixed_avg_type == OptionAvgType.ARITHMETIC:
         if not analytics_mode:
             df = df[df['avg_type'] == OptionAvgType.ARITHMETIC.value]
@@ -20,7 +21,8 @@ def get_trained_net_and_test_set(df: pd.DataFrame, test_size: float, fixed_avg_t
             np.float32).to_numpy()
     else:
         if not analytics_mode:
-            df['numeric_avg_type'] = df.apply(lambda row: 1 if row.avg_type == OptionAvgType.ARITHMETIC.value else 0, axis=1)
+            df['numeric_avg_type'] = df.apply(lambda row: 1 if row.avg_type == OptionAvgType.ARITHMETIC.value else 0,
+                                              axis=1)
         df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility', 'numeric_avg_type']].astype(
             np.float32).to_numpy()
 
@@ -31,7 +33,8 @@ def get_trained_net_and_test_set(df: pd.DataFrame, test_size: float, fixed_avg_t
     train_loss, val_loss = net.fit(x_train, y_train, analytics_mode)
 
     if not analytics_mode:
-        create_chart(train_loss, val_loss, 'positive_network')
+        if not no_charts:
+            create_chart(train_loss, val_loss, 'positive_network')
         return net, x_test, y_test
     else:
         return net, x_test, y_test, train_loss, val_loss

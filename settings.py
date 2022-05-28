@@ -16,7 +16,7 @@ OPTIONS_PARAMS_RANDOM_SEED = 234  # Set None not to fix seed
 
 # Neural networks
 DATASET_SIZE = 100000  # Used only when USE_DATA_FROM_FILE = False
-EPOCHS_COUNT = 4000
+EPOCHS_COUNT = 1000
 BATCH_SIZE = 100
 USE_CONVEX_NETWORK = True
 

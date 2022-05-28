@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from monte_carlo import create_dataset
@@ -8,7 +9,7 @@ from settings import USE_DATA_FROM_FILE, DATASET_SIZE, USE_CONVEX_NETWORK, FIXED
 from utils.typing import OptionAvgType
 
 
-def make_predicted_df(fixed_avg_type: OptionAvgType = None):
+def make_predicted_df(x_test: list, y_test: list, predict_price: np.ndarray, fixed_avg_type: OptionAvgType = None):
     if fixed_avg_type is None:
         df_predicted = pd.DataFrame(x_test, columns=['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility',
                                                      'numeric_avg_type'])
@@ -24,7 +25,7 @@ def make_predicted_df(fixed_avg_type: OptionAvgType = None):
     return df_predicted
 
 
-if __name__ == '__main__':
+def main():
     if USE_DATA_FROM_FILE:
         df = pd.read_csv('monte_carlo_prices.csv').iloc[:500, :]
     else:
@@ -41,7 +42,7 @@ if __name__ == '__main__':
 
     predict_price = net.predict(x_test).detach().numpy()
 
-    df_test = make_predicted_df(fixed_avg_type=FIXED_AVG_TYPE)
+    df_test = make_predicted_df(x_test, y_test, predict_price, fixed_avg_type=FIXED_AVG_TYPE)
     df_test.to_csv('convex_net_prices.csv' if USE_CONVEX_NETWORK else 'pos_net_prices.csv', index=False,
                    float_format='%.4f')
     print(f'MSE: {((y_test - predict_price) ** 2).mean()}')
@@ -51,3 +52,7 @@ if __name__ == '__main__':
         full_df = pd.concat([df_test, greeks], axis=1)
         full_df.to_csv('convex_net_greeks.csv' if USE_CONVEX_NETWORK else 'pos_net_greeks.csv', index=False,
                        float_format='%.4f')
+
+
+if __name__ == '__main__':
+    main()
