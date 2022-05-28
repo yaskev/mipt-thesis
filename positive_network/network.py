@@ -79,6 +79,6 @@ class OptionsNet:
         return pd.DataFrame(data={
             'delta(1e-3)': x_greeks.grad[:, 0] * 1000,
             'vega(1e-3)': x_greeks.grad[:, 3] * 1000,
-            'theta(1e-3)': x_greeks.grad[:, 1] * 1000,
+            'theta(1e-3)': -x_greeks.grad[:, 1] * 1000,
             'rho(1e-3)': x_greeks.grad[:, 2] * 1000
         })

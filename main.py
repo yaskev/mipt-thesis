@@ -43,8 +43,8 @@ def main():
     predict_price = net.predict(x_test).detach().numpy()
 
     df_test = make_predicted_df(x_test, y_test, predict_price, fixed_avg_type=FIXED_AVG_TYPE)
-    df_test.to_csv('convex_net_prices.csv' if USE_CONVEX_NETWORK else 'pos_net_prices.csv', index=False,
-                   float_format='%.4f')
+    # df_test.to_csv('convex_net_prices.csv' if USE_CONVEX_NETWORK else 'pos_net_prices.csv', index=False,
+    #                float_format='%.4f')
     print(f'MSE: {((y_test - predict_price) ** 2).mean()}')
 
     if CALC_GREEKS:
