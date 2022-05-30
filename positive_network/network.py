@@ -82,3 +82,22 @@ class OptionsNet:
             'theta(1e-3)': -x_greeks.grad[:, 1] * 1000,
             'rho(1e-3)': x_greeks.grad[:, 2] * 1000
         })
+
+    def get_alt_greeks(self, x_greeks: pd.DataFrame) -> pd.DataFrame:
+        x_greeks = torch.from_numpy(x_greeks)
+        predicts = []
+
+        x_greeks_split = torch.split(x_greeks, 1)
+        for i in range(len(x_greeks_split)):
+            x_greeks_split[i].requires_grad = True
+            predicts.append(self.net.forward(x_greeks_split[i]))
+
+        gradients = torch.autograd.grad(outputs=predicts, inputs=x_greeks_split)
+        gradients = torch.cat(gradients, 0)
+
+        return pd.DataFrame(data={
+            'delta': gradients[:, 0],
+            'vega': gradients[:, 3],
+            'theta': -gradients[:, 1],
+            'rho': gradients[:, 2]
+        })

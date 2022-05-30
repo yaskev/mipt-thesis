@@ -4,8 +4,7 @@ from main import make_predicted_df
 from positive_network.net_maker import get_trained_net_and_test_set as get_positive_net_and_test_set
 from convex_network.net_maker import get_trained_net_and_test_set as get_convex_net_and_test_set
 from settings import FIXED_AVG_TYPE
-
-from specific_datasets.specific.convexity import idx_to_param
+from utils.mapping import idx_to_param
 
 
 def get_net_prices():
