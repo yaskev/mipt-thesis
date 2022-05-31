@@ -29,10 +29,10 @@ def make_predicted_df(x_test: list, y_test: list, predict_price: np.ndarray, fix
 
 def main():
     if USE_DATA_FROM_FILE:
-        df = pd.read_csv('monte_carlo_prices.csv').iloc[:1000, :]
+        df = pd.read_csv('prices_mc_with_ci.csv').iloc[:1000, :]
     else:
         df = create_dataset(DATASET_SIZE)
-        df.to_csv('options_prices.csv', index=False, float_format='%.4f')
+        df.to_csv('prices_mc_with_ci.csv', index=False, float_format='%.4f')
 
     if PLOT_SOME_PATHS:
         plot_paths(df.iloc[:5, :])
@@ -50,15 +50,15 @@ def main():
     print(f'MSE: {((y_test - predict_price) ** 2).mean()}')
 
     if CALC_GREEKS:
-        greeks = net.get_alt_greeks(x_test)
+        greeks = net.get_greeks(x_test)
         df_from_numpy = pd.DataFrame(x_test, columns=[*list(idx_to_col_name.values()), 'numeric_avg_type'])
         df_from_numpy['avg_type'] = df_from_numpy.apply(
             lambda row: 'ARITHMETIC' if row.numeric_avg_type == 1 else 'GEOMETRIC', axis=1)
-        # greeks_mc = get_greeks(df_from_numpy)
-        full_df = pd.concat([df_test, greeks], axis=1)
+        greeks_mc = get_greeks(df_from_numpy)
+        full_df = pd.concat([df_test, greeks, greeks_mc], axis=1)
         # full_df.to_csv('convex_net_greeks.csv' if USE_CONVEX_NETWORK else 'pos_net_greeks.csv', index=False,
         #                float_format='%.4f')
-        full_df.to_csv('only_greeks_con.csv', index=False, float_format='%.4f')
+        full_df.to_csv('greeks.csv', index=False, float_format='%.4f')
 
 
 if __name__ == '__main__':

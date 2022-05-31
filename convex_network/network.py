@@ -11,7 +11,6 @@ from positive_network.modules.linear_bias_positive import LinearBiasPositive
 from settings import EPOCHS_COUNT, VERBOSE
 
 from utils.batches import get_batches
-from utils.plotting import create_chart
 
 
 class ConvexNet:
@@ -67,42 +66,39 @@ class ConvexNet:
             return self.net.forward(x)
 
     def get_greeks(self, x_greeks: pd.DataFrame) -> pd.DataFrame:
-        self.net.train()
+        EPS = 0.01
 
+        x_greeks_shift = x_greeks.copy()
+        x_greeks_shift[:, 0] = x_greeks_shift[:, 0] * (1 + EPS)
         x_greeks = torch.from_numpy(x_greeks)
-        x_greeks.requires_grad = True
-        self.optim.zero_grad()
-        predict = self.net.forward(x_greeks)
+        x_greeks_shift = torch.from_numpy(x_greeks_shift)
 
-        # Calculate grad w.r.t. price, not loss
-        loss = self.criterion.forward(torch.sqrt(predict), torch.zeros_like(predict))
-        loss.backward()
-
-        self.net.eval()
-
-        return pd.DataFrame(data={
-            'delta(1e-3)': x_greeks.grad[:, 0] * 1000,
-            'vega(1e-3)': x_greeks.grad[:, 3] * 1000,
-            'theta(1e-3)': -x_greeks.grad[:, 1] * 1000,
-            'rho(1e-3)': x_greeks.grad[:, 2] * 1000
-        })
-
-    def get_alt_greeks(self, x_greeks: pd.DataFrame) -> pd.DataFrame:
-        x_greeks = torch.from_numpy(x_greeks)
         predicts = []
+        predicts_shift = []
 
         x_greeks_split = torch.split(x_greeks, 1)
+        x_greeks_shift_split = torch.split(x_greeks_shift, 1)
         for i in range(len(x_greeks_split)):
             x_greeks_split[i].requires_grad = True
             predicts.append(self.net.forward(x_greeks_split[i]))
 
+        for i in range(len(x_greeks_shift_split)):
+            x_greeks_shift_split[i].requires_grad = True
+            predicts_shift.append(self.net.forward(x_greeks_shift_split[i]))
+
         gradients = torch.autograd.grad(outputs=predicts, inputs=x_greeks_split)
         gradients = torch.cat(gradients, 0)
+
+        gradients_shift = torch.autograd.grad(outputs=predicts_shift, inputs=x_greeks_shift_split)
+        gradients_shift = torch.cat(gradients_shift, 0)
+
+        gamma = (gradients_shift[:, 0] - gradients[:, 0]) / (EPS * x_greeks[:, 0])
 
         return pd.DataFrame(data={
             'delta': gradients[:, 0],
             'vega': gradients[:, 3],
             'theta': -gradients[:, 1],
-            'rho': gradients[:, 2]
+            'rho': gradients[:, 2],
+            'gamma': gamma
         })
 
