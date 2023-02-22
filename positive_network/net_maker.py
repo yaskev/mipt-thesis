@@ -9,21 +9,31 @@ from utils.typing import OptionAvgType
 
 def get_trained_net_and_test_set(df: pd.DataFrame, test_size: float, fixed_avg_type: OptionAvgType = None,
                                  analytics_mode: bool = False, no_charts: bool = False):
+
+    # Polynomial features
+    df['t_sigma_2'] = df['ttm'] * df['volatility'] * df['volatility']
+
     if fixed_avg_type == OptionAvgType.ARITHMETIC:
         if not analytics_mode:
             df = df[df['avg_type'] == OptionAvgType.ARITHMETIC.value]
-        df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility']].astype(
+        df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility',
+                        't_sigma_2',
+                    ]].astype(
             np.float32).to_numpy()
     elif fixed_avg_type == OptionAvgType.GEOMETRIC:
         if not analytics_mode:
             df = df[df['avg_type'] == OptionAvgType.GEOMETRIC.value]
-        df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility']].astype(
+        df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility',
+                        't_sigma_2',
+                        ]].astype(
             np.float32).to_numpy()
     else:
         if not analytics_mode:
             df['numeric_avg_type'] = df.apply(lambda row: 1 if row.avg_type == OptionAvgType.ARITHMETIC.value else 0,
                                               axis=1)
-        df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility', 'numeric_avg_type']].astype(
+        df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility', 'numeric_avg_type',
+                        't_sigma_2',
+                        ]].astype(
             np.float32).to_numpy()
 
     df_target = df['price_strike_ratio'].astype(np.float32).to_numpy()

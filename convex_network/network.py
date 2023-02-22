@@ -1,3 +1,4 @@
+import datetime
 from typing import Tuple, List
 
 import pandas as pd
@@ -27,6 +28,7 @@ class ConvexNet:
         x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2)
         train_loss = []
         val_loss = []
+        start = datetime.datetime.now()
         for i in range(EPOCHS_COUNT):
             if VERBOSE and i % 10 == 0 and not analytics_mode:
                 print(f'Epoch: {i} out of {EPOCHS_COUNT}')
@@ -57,6 +59,7 @@ class ConvexNet:
                     tmp_loss.append(loss.item())
             val_loss.append(sum(tmp_loss) / len(tmp_loss))
 
+        print(f'Training time: {datetime.datetime.now() - start}')
         return train_loss, val_loss
 
     def predict(self, x_test: pd.DataFrame):

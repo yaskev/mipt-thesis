@@ -13,14 +13,15 @@ PLOT_SOME_PATHS = False
 # Random number generator seeds
 PATH_RANDOM_SEED = 42  # Set None not to fix seed
 OPTIONS_PARAMS_RANDOM_SEED = 234  # Set None not to fix seed
+TORCH_SEED = 8778546
 
 # Neural networks
 DATASET_SIZE = 100000  # Used only when USE_DATA_FROM_FILE = False
-EPOCHS_COUNT = 4000
+EPOCHS_COUNT = 5000
 BATCH_SIZE = 100
 USE_CONVEX_NETWORK = True
 
 # General
 VERBOSE = True
 FIXED_AVG_TYPE = None
-CALC_GREEKS = True
+CALC_GREEKS = False

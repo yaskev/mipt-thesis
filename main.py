@@ -13,7 +13,7 @@ from utils.typing import OptionAvgType
 
 def make_predicted_df(x_test: list, y_test: list, predict_price: np.ndarray, fixed_avg_type: OptionAvgType = None):
     if fixed_avg_type is None:
-        df_predicted = pd.DataFrame(x_test, columns=['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility',
+        df_predicted = pd.DataFrame(x_test[:, :5], columns=['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility',
                                                      'numeric_avg_type'])
         df_predicted['avg_type'] = df_predicted.apply(
             lambda row: 'ARITHMETIC' if row.numeric_avg_type == 1 else 'GEOMETRIC', axis=1)
@@ -29,7 +29,7 @@ def make_predicted_df(x_test: list, y_test: list, predict_price: np.ndarray, fix
 
 def main():
     if USE_DATA_FROM_FILE:
-        df = pd.read_csv('prices_mc_with_ci.csv').iloc[:1000, :]
+        df = pd.read_csv('prices_mc_with_ci.csv').iloc[:5000, :]
     else:
         df = create_dataset(DATASET_SIZE)
         df.to_csv('prices_mc_with_ci.csv', index=False, float_format='%.4f')

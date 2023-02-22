@@ -1,3 +1,4 @@
+import datetime
 from typing import Tuple, List
 
 import pandas as pd
@@ -5,7 +6,7 @@ import torch
 from sklearn.model_selection import train_test_split
 from torch import nn
 
-from settings import EPOCHS_COUNT, VERBOSE
+from settings import EPOCHS_COUNT, VERBOSE, TORCH_SEED
 from utils.batches import get_batches
 from utils.plotting import create_chart
 from .modules.linear_positive import LinearPositive
@@ -14,20 +15,22 @@ from .modules.linear_bias_positive import LinearBiasPositive
 
 class OptionsNet:
     def __init__(self, in_features: int):
+        torch.manual_seed(TORCH_SEED)
         self.net = nn.Sequential(
             LinearPositive(in_features, in_features + 3),
             nn.Sigmoid(),
             LinearBiasPositive(in_features + 3, 1)
         )
         self.criterion = nn.MSELoss()
-        self.optim = torch.optim.Adam(self.net.parameters(), lr=3e-4, betas=(0.9, 0.999), eps=1e-8)
+        self.optim = torch.optim.Adam(self.net.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8)
 
     def fit(self, x_train: pd.DataFrame, y_train: pd.Series, analytics_mode: bool = False) -> Tuple[List[float], List[float]]:
         x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2)
         train_loss = []
         val_loss = []
+        start_time = datetime.datetime.now()
         for i in range(EPOCHS_COUNT):
-            if VERBOSE and i % 10 == 0 and not analytics_mode:
+            if VERBOSE and i % 50 == 0 and not analytics_mode:
                 print(f'Epoch: {i} out of {EPOCHS_COUNT}')
             self.net.train()
             tmp_loss = []
@@ -54,6 +57,8 @@ class OptionsNet:
                     tmp_loss.append(loss.item())
                 val_loss.append(sum(tmp_loss) / len(tmp_loss))
 
+        if VERBOSE and not analytics_mode:
+            print(f'Training time: {datetime.datetime.now() - start_time}')
         return train_loss, val_loss
 
     def predict(self, x_test: pd.DataFrame):
