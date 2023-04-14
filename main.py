@@ -7,7 +7,8 @@ from monte_carlo.greeks import get_greeks
 from monte_carlo.path_generator import plot_paths
 from positive_network.net_maker import get_trained_net_and_test_set as get_positive_net_and_test_set
 from convex_network.net_maker import get_trained_net_and_test_set as get_convex_net_and_test_set
-from settings import USE_DATA_FROM_FILE, DATASET_SIZE, USE_CONVEX_NETWORK, FIXED_AVG_TYPE, PLOT_SOME_PATHS, CALC_GREEKS
+from settings import USE_DATA_FROM_FILE, DATASET_SIZE, USE_CONVEX_NETWORK, FIXED_AVG_TYPE, PLOT_SOME_PATHS, CALC_GREEKS, \
+    SAVE_TRAINED_NET
 from utils.mapping import idx_to_col_name
 from utils.typing import OptionAvgType
 
@@ -48,8 +49,10 @@ def main():
     df_test = make_predicted_df(x_test, y_test, predict_price, fixed_avg_type=FIXED_AVG_TYPE)
     df_test.to_csv('convex_net_prices.csv' if USE_CONVEX_NETWORK else 'pos_net_prices.csv', index=False,
                    float_format='%.4f')
-    print(f'MSE: {round(((df_test["monte_carlo_price"] - df_test["net_price"]) ** 2).mean() * 10000, 1)} * 1e-4')
-    joblib.dump(net, 'trained_positive.sav')
+    print('MSE: {:.2e}'.format(((df_test["monte_carlo_price"] - df_test["net_price"]) ** 2).mean()))
+
+    if SAVE_TRAINED_NET:
+        joblib.dump(net, 'trained_convex.sav')
 
     if CALC_GREEKS:
         greeks = net.get_greeks(x_test)

@@ -1,8 +1,10 @@
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from positive_network.network import OptionsNet
+from settings import USE_PRETRAINED_NET, POSITIVE_MODEL_PATH
 from utils.plotting import create_chart
 from utils.typing import OptionAvgType
 
@@ -29,6 +31,11 @@ def get_trained_net_and_test_set(df: pd.DataFrame, test_size: float, fixed_avg_t
     df_target = df['price_strike_ratio'].astype(np.float32).to_numpy()
 
     x_train, x_test, y_train, y_test = train_test_split(df_values, df_target, test_size=test_size, random_state=42)
+
+    if USE_PRETRAINED_NET:
+        net = joblib.load(POSITIVE_MODEL_PATH)
+        return net, x_test, y_test
+
     net = OptionsNet(x_train.shape[1])
     train_loss, val_loss = net.fit(x_train, y_train, analytics_mode)
 
