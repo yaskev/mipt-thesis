@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import joblib
 
 from monte_carlo import create_dataset
 from monte_carlo.greeks import get_greeks
@@ -29,7 +30,7 @@ def make_predicted_df(x_test: list, y_test: list, predict_price: np.ndarray, fix
 
 def main():
     if USE_DATA_FROM_FILE:
-        df = pd.read_csv('prices_mc_with_ci.csv').iloc[:1000, :]
+        df = pd.read_csv('prices_mc_with_ci.csv')
     else:
         df = create_dataset(DATASET_SIZE)
         df.to_csv('prices_mc_with_ci.csv', index=False, float_format='%.4f')
@@ -45,9 +46,10 @@ def main():
     predict_price = net.predict(x_test).detach().numpy()
 
     df_test = make_predicted_df(x_test, y_test, predict_price, fixed_avg_type=FIXED_AVG_TYPE)
-    # df_test.to_csv('convex_net_prices.csv' if USE_CONVEX_NETWORK else 'pos_net_prices.csv', index=False,
-    #                float_format='%.4f')
-    print(f'MSE: {((y_test - predict_price) ** 2).mean()}')
+    df_test.to_csv('convex_net_prices.csv' if USE_CONVEX_NETWORK else 'pos_net_prices.csv', index=False,
+                   float_format='%.4f')
+    print(f'MSE: {round(((df_test["monte_carlo_price"] - df_test["net_price"]) ** 2).mean() * 10000, 1)} * 1e-4')
+    joblib.dump(net, 'trained_positive.sav')
 
     if CALC_GREEKS:
         greeks = net.get_greeks(x_test)
