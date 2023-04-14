@@ -26,7 +26,9 @@ def get_trained_net_and_test_set(df: pd.DataFrame, test_size: float, fixed_avg_t
         df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility', 'numeric_avg_type']].astype(
             np.float32).to_numpy()
 
-    df_target = df['price_strike_ratio'].astype(np.float32).to_numpy()
+    df = add_time_value_column(df)
+
+    df_target = df['time_value'].astype(np.float32).to_numpy()
 
     x_train, x_test, y_train, y_test = train_test_split(df_values, df_target, test_size=test_size, random_state=42)
     net = OptionsNet(x_train.shape[1])
@@ -38,3 +40,21 @@ def get_trained_net_and_test_set(df: pd.DataFrame, test_size: float, fixed_avg_t
         return net, x_test, y_test
     else:
         return net, x_test, y_test, train_loss, val_loss
+
+def add_time_value_column(df: pd.DataFrame) -> pd.DataFrame:
+    intrinsic_value = df['spot_strike_ratio'] - np.exp(-df['risk_free_rate'] * df['ttm'])
+    intrinsic_value[intrinsic_value < 0] = 0
+    df['time_value'] = df['price_strike_ratio'] - intrinsic_value
+
+    print(df[df['time_value'] < 0].shape)
+
+    return df
+
+
+def remove_time_value_column(df: pd.DataFrame) -> pd.DataFrame:
+    intrinsic_value = df['spot_strike_ratio'] - np.exp(-df['risk_free_rate'] * df['ttm'])
+    intrinsic_value[intrinsic_value < 0] = 0
+    df['net_price'] = df['time_value'] + intrinsic_value
+
+    return df
+
