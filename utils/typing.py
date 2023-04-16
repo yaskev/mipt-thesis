@@ -9,3 +9,9 @@ class OptionAvgType(Enum):
 class NetType(Enum):
     CONVEX = 'CONVEX'
     POSITIVE = 'POSITIVE'
+
+
+class ComplexNetworkType(Enum):
+    POSITIVE_NETWORK = 'positive_network'
+    CONVEX_NETWORK = 'convex_network'
+    SIGMA_POSITIVE_NETWORK = 'sigma_positive_network'
