@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 
 from monte_carlo.dataset_maker import _get_price
@@ -13,8 +15,12 @@ def get_greeks(data: pd.DataFrame) -> pd.DataFrame:
 
     greek_dict = dict()
 
+    total_time = 0
     for key, value in idx_to_col_name.items():
         print(f'{value}')
+
+        start = time.process_time()
+
         shifted_data = data.copy(deep=True)
         shifted_data[idx_to_col_name[key]] = shifted_data[idx_to_col_name[key]] * (1 + EPS)
         shifted_price_ci_df = shifted_data.apply(_get_price, axis=1, result_type='expand')
@@ -23,10 +29,14 @@ def get_greeks(data: pd.DataFrame) -> pd.DataFrame:
         greeks = (shifted_price_ci_df['price_strike_ratio'] - original_price_ci_df['price_strike_ratio']) / (data[idx_to_col_name[key]] * EPS)
         greek_dict[idx_to_greek[key]] = greeks
 
+        total_time += (time.process_time() - start)
+
         right_ci_greek = (shifted_price_ci_df['right_ci'] - original_price_ci_df['left_ci']) / (data[idx_to_col_name[key]] * EPS)
         left_ci_greek = (shifted_price_ci_df['left_ci'] - original_price_ci_df['right_ci']) / (data[idx_to_col_name[key]] * EPS)
         greek_dict[f'{idx_to_greek[key]}_l_ci'] = left_ci_greek
         greek_dict[f'{idx_to_greek[key]}_r_ci'] = right_ci_greek
+
+    print(f'Total MC greeks time: {total_time}')
 
     res_df = pd.DataFrame(greek_dict)
     res_df['theta_mc'] = -res_df['theta_mc']

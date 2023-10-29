@@ -11,19 +11,20 @@ USE_ANTITHETIC_VARIATES = True
 PLOT_SOME_PATHS = False
 
 # Random number generator seeds
-PATH_RANDOM_SEED = 42  # Set None not to fix seed
-OPTIONS_PARAMS_RANDOM_SEED = 234  # Set None not to fix seed
+PATH_RANDOM_SEED = None  # Set None not to fix seed
+OPTIONS_PARAMS_RANDOM_SEED = None  # Set None not to fix seed
 
 # Neural networks
-DATASET_SIZE = 100000  # Used only when USE_DATA_FROM_FILE = False
+DATASET_SIZE = 5000  # Used only when USE_DATA_FROM_FILE = False
 EPOCHS_COUNT = 1000
 BATCH_SIZE = 256
-NETWORK_TYPE = ComplexNetworkType.SIGMA_POSITIVE_NETWORK
+NETWORK_TYPE = ComplexNetworkType.CONVEX_NETWORK
 
 # General
 VERBOSE = True
 FIXED_AVG_TYPE = None
-CALC_GREEKS = False
+CALC_GREEKS = True
+WITH_CI_STATS = False
 
 SAVE_TRAINED_NET = False
 USE_PRETRAINED_NET = True
