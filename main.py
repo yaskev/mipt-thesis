@@ -55,7 +55,8 @@ def make_predicted_vol_df(x_test: list, y_test: list, predict_vol: np.ndarray, f
 
 def main():
     if USE_DATA_FROM_FILE:
-        df = pd.read_csv('prices_mc_with_ci_test_greeks_50.csv')
+        df = pd.read_csv('datasets/train/prices_mc_with_ci.csv')
+        test_df = pd.read_csv('datasets/test/prices_mc_with_ci.csv')
         # df = pd.read_csv('cme_data.csv')
     else:
         df = create_dataset(DATASET_SIZE)
@@ -65,9 +66,9 @@ def main():
         plot_paths(df.iloc[:5, :])
 
     if NETWORK_TYPE == ComplexNetworkType.CONVEX_NETWORK:
-        net, x_test, y_test = get_convex_net_and_test_set(df, test_size=1, fixed_avg_type=FIXED_AVG_TYPE)
+        net, x_test, y_test = get_convex_net_and_test_set(df, test_df, test_size=0.1, fixed_avg_type=FIXED_AVG_TYPE)
     elif NETWORK_TYPE == ComplexNetworkType.POSITIVE_NETWORK:
-        net, x_test, y_test = get_positive_net_and_test_set(df, test_size=1, fixed_avg_type=FIXED_AVG_TYPE)
+        net, x_test, y_test = get_positive_net_and_test_set(df, test_df, test_size=0.1, fixed_avg_type=FIXED_AVG_TYPE)
     else:
         net, x_test, y_test = get_sigma_positive_net_and_test_set(df, test_size=0.1, fixed_avg_type=FIXED_AVG_TYPE)
         predict_vol = net.predict(x_test).detach().numpy()

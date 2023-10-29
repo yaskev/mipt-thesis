@@ -1,5 +1,6 @@
 from typing import Tuple, List
 
+import numpy as np
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
@@ -23,8 +24,8 @@ class ConvexNet:
         self.criterion = nn.MSELoss()
         self.optim = torch.optim.Adam(self.net.parameters(), lr=3e-4, betas=(0.9, 0.999), eps=1e-8)
 
-    def fit(self, x_train: pd.DataFrame, y_train: pd.Series, analytics_mode: bool = False) -> Tuple[List[float], List[float]]:
-        x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2)
+    def fit(self, x_train: np.ndarray, y_train: np.ndarray, x_val: np.ndarray, y_val: np.ndarray, analytics_mode: bool = False) -> Tuple[List[float], List[float]]:
+        # x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2)
         train_loss = []
         val_loss = []
         for i in range(EPOCHS_COUNT):
