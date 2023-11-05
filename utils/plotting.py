@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from settings import NUMBER_OF_STEPS
 
 
-def create_chart(train_loss: List[float], val_loss: List[float], folder: str, strict_path: str = None):
+def create_chart(train_loss: List[float], val_loss: List[float], folder: str, tag: str = '', strict_path: str = None):
     plt.figure(figsize=(8, 6))
     plt.plot(np.arange(len(train_loss)), train_loss, label='Train')
     plt.plot(np.arange(len(val_loss)), val_loss, label='Validation')
@@ -20,9 +20,9 @@ def create_chart(train_loss: List[float], val_loss: List[float], folder: str, st
     plt.legend()
 
     if strict_path is not None:
-        plt.savefig(strict_path)
+        plt.savefig(f'{tag}{strict_path}')
     else:
-        plt.savefig(os.path.join(folder, 'charts', f'{datetime.now()}.jpg'))
+        plt.savefig(os.path.join(folder, 'charts', f'{tag}{datetime.now()}.jpg'))
 
 
 def plot_different_metrics(metrics: Dict[str, List[float]], dataset_sizes: List[float], strict_path: str, metric_name: str):

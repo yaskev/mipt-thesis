@@ -3,6 +3,7 @@ import time
 import numpy as np
 import pandas as pd
 import joblib
+import torch
 
 from monte_carlo import create_dataset
 from monte_carlo.greeks import get_greeks
@@ -12,6 +13,7 @@ from convex_network.net_maker import get_trained_net_and_test_set as get_convex_
 from sigma_network.net_maker import get_trained_net_and_test_set as get_sigma_positive_net_and_test_set
 from settings import USE_DATA_FROM_FILE, DATASET_SIZE, FIXED_AVG_TYPE, PLOT_SOME_PATHS, CALC_GREEKS, \
     SAVE_TRAINED_NET, NETWORK_TYPE, WITH_CI_STATS
+from sigma_network.network import SigmaNetType
 from utils.mapping import idx_to_col_name
 from utils.typing import OptionAvgType, ComplexNetworkType
 
@@ -54,12 +56,13 @@ def make_predicted_vol_df(x_test: list, y_test: list, predict_vol: np.ndarray, f
 
 
 def main():
+    torch.set_default_tensor_type(torch.DoubleTensor)
     if USE_DATA_FROM_FILE:
-        # df = pd.read_csv('datasets/train/prices_mc_with_ci.csv')
+        df = pd.read_csv('datasets/train/prices_mc_with_ci.csv')
         # df = pd.read_csv('prices_mc_with_ci_test.csv')
         # df = pd.read_csv('datasets/test/prices_mc_with_ci_test_greeks_50.csv')
-        # test_df = pd.read_csv('datasets/test/prices_mc_with_ci.csv')
-        df = pd.read_csv('cme_data.csv')
+        test_df = pd.read_csv('datasets/test/prices_mc_with_ci.csv')
+        # df = pd.read_csv('cme_data.csv')
     else:
         df = create_dataset(DATASET_SIZE)
         test_df = df
@@ -69,11 +72,13 @@ def main():
         plot_paths(df.iloc[:5, :])
 
     if NETWORK_TYPE == ComplexNetworkType.CONVEX_NETWORK:
-        net, x_test, y_test = get_convex_net_and_test_set(df, test_df, test_size=1, fixed_avg_type=FIXED_AVG_TYPE)
+        net, x_test, y_test = get_convex_net_and_test_set(df, test_df, test_size=0.1, fixed_avg_type=FIXED_AVG_TYPE)
     elif NETWORK_TYPE == ComplexNetworkType.POSITIVE_NETWORK:
-        net, x_test, y_test = get_positive_net_and_test_set(df, test_df, test_size=1, fixed_avg_type=FIXED_AVG_TYPE)
+        net, x_test, y_test = get_positive_net_and_test_set(df, test_df, test_size=0.1, fixed_avg_type=FIXED_AVG_TYPE)
     else:
-        net, x_test, y_test = get_sigma_positive_net_and_test_set(df, test_size=0.1, fixed_avg_type=FIXED_AVG_TYPE)
+        net, x_test, y_test = get_sigma_positive_net_and_test_set(df, test_df, test_size=0.1,
+                                                                  fixed_avg_type=FIXED_AVG_TYPE,
+                                                                  net_type=SigmaNetType.POS_NET_WIDE)
         predict_vol = net.predict(x_test).detach().numpy()
         df_test = make_predicted_vol_df(x_test, y_test, predict_vol, fixed_avg_type=FIXED_AVG_TYPE)
         df_test.to_csv('pos_net_sigma_inf.csv', index=False, float_format='%.4f')
@@ -89,7 +94,7 @@ def main():
     for _ in range(1):
         start = time.process_time()
         if WITH_CI_STATS:
-            predict_price = net.predict(x_test[:,:-2]).detach().numpy()
+            predict_price = net.predict(x_test).detach().numpy()
         else:
             predict_price = net.predict(x_test).detach().numpy()
         t.append(time.process_time() - start)
@@ -105,7 +110,7 @@ def main():
         print(in_ci.mean())
 
     if SAVE_TRAINED_NET:
-        joblib.dump(net, 'trained_convex.sav')
+        joblib.dump(net, 'trained_new_pos_1.sav')
 
     if CALC_GREEKS:
         t = []
