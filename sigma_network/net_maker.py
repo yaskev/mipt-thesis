@@ -17,33 +17,33 @@ def get_trained_net_and_test_set(df: pd.DataFrame, test_df: pd.DataFrame, test_s
             df = df[df['avg_type'] == OptionAvgType.ARITHMETIC.value]
             test_df = test_df[test_df['avg_type'] == OptionAvgType.ARITHMETIC.value]
         df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'price_strike_ratio']].astype(
-            np.float64).to_numpy()
+            np.float32).to_numpy()
         test_df_values = test_df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'price_strike_ratio']].astype(
-            np.float64).to_numpy()
+            np.float32).to_numpy()
     elif fixed_avg_type == OptionAvgType.GEOMETRIC:
         if not analytics_mode:
             df = df[df['avg_type'] == OptionAvgType.GEOMETRIC.value]
             test_df = test_df[test_df['avg_type'] == OptionAvgType.GEOMETRIC.value]
         df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'price_strike_ratio']].astype(
-            np.float64).to_numpy()
+            np.float32).to_numpy()
         test_df_values = test_df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'price_strike_ratio']].astype(
-            np.float64).to_numpy()
+            np.float32).to_numpy()
     else:
         # if not analytics_mode:
         #     df['numeric_avg_type'] = df.apply(lambda row: 1 if row.avg_type == OptionAvgType.ARITHMETIC.value else 0,
         #                                       axis=1)
         df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'price_strike_ratio']].astype(
-            np.float64).to_numpy()
+            np.float32).to_numpy()
         test_df_values = test_df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'price_strike_ratio']].astype(
-            np.float64).to_numpy()
+            np.float32).to_numpy()
 
-    df_target = df['volatility'].astype(np.float64).to_numpy()
-    test_df_target = test_df['volatility'].astype(np.float64).to_numpy()
+    df_target = df['volatility'].astype(np.float32).to_numpy()
+    test_df_target = test_df['volatility'].astype(np.float32).to_numpy()
 
-    scaler = MinMaxScaler()
-    scaler.fit(df_values)
-    df_values = scaler.transform(df_values)
-    test_df_values = scaler.transform(test_df_values)
+    # scaler = MinMaxScaler()
+    # scaler.fit(df_values)
+    # df_values = scaler.transform(df_values)
+    # test_df_values = scaler.transform(test_df_values)
 
     if USE_PRETRAINED_NET:
         x_test = df_values

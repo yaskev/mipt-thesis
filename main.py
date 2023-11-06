@@ -56,12 +56,14 @@ def make_predicted_vol_df(x_test: list, y_test: list, predict_vol: np.ndarray, f
 
 
 def main():
-    torch.set_default_tensor_type(torch.DoubleTensor)
     if USE_DATA_FROM_FILE:
-        df = pd.read_csv('datasets/train/prices_mc_with_ci.csv')
+        # df = pd.read_csv('datasets/train/prices_mc_with_ci.csv')
         # df = pd.read_csv('prices_mc_with_ci_test.csv')
-        # df = pd.read_csv('datasets/test/prices_mc_with_ci_test_greeks_50.csv')
-        test_df = pd.read_csv('datasets/test/prices_mc_with_ci.csv')
+        # df = pd.read_csv('datasets/train64/prices_mc_with_ci_train_greeks_50.csv')
+        # df = pd.read_csv('datasets/test/prices_mc_with_ci.csv')
+        # test_df = df
+        df = pd.read_csv('datasets/test/prices_mc_with_ci.csv')
+        test_df = df
         # df = pd.read_csv('cme_data.csv')
     else:
         df = create_dataset(DATASET_SIZE)
@@ -72,9 +74,9 @@ def main():
         plot_paths(df.iloc[:5, :])
 
     if NETWORK_TYPE == ComplexNetworkType.CONVEX_NETWORK:
-        net, x_test, y_test = get_convex_net_and_test_set(df, test_df, test_size=0.1, fixed_avg_type=FIXED_AVG_TYPE)
+        net, x_test, y_test = get_convex_net_and_test_set(df, test_df, test_size=1, fixed_avg_type=FIXED_AVG_TYPE)
     elif NETWORK_TYPE == ComplexNetworkType.POSITIVE_NETWORK:
-        net, x_test, y_test = get_positive_net_and_test_set(df, test_df, test_size=0.1, fixed_avg_type=FIXED_AVG_TYPE)
+        net, x_test, y_test = get_positive_net_and_test_set(df, test_df, test_size=1, fixed_avg_type=FIXED_AVG_TYPE)
     else:
         net, x_test, y_test = get_sigma_positive_net_and_test_set(df, test_df, test_size=0.1,
                                                                   fixed_avg_type=FIXED_AVG_TYPE,
@@ -94,7 +96,7 @@ def main():
     for _ in range(1):
         start = time.process_time()
         if WITH_CI_STATS:
-            predict_price = net.predict(x_test).detach().numpy()
+            predict_price = net.predict(x_test[:,:-2]).detach().numpy()
         else:
             predict_price = net.predict(x_test).detach().numpy()
         t.append(time.process_time() - start)
@@ -110,7 +112,7 @@ def main():
         print(in_ci.mean())
 
     if SAVE_TRAINED_NET:
-        joblib.dump(net, 'trained_new_pos_1.sav')
+        joblib.dump(net, 'trained_conv_doubles_2.sav')
 
     if CALC_GREEKS:
         t = []
@@ -121,14 +123,14 @@ def main():
             t.append(time.process_time() - start)
         print(sum(t) / len(t))
 
-        df_from_numpy = pd.DataFrame(x_test, columns=[*list(idx_to_col_name.values()), 'numeric_avg_type'])
-        df_from_numpy['avg_type'] = df_from_numpy.apply(
-            lambda row: 'ARITHMETIC' if row.numeric_avg_type == 1 else 'GEOMETRIC', axis=1)
-        greeks_mc = get_greeks(df_from_numpy)
-        full_df = pd.concat([df_test, greeks, greeks_mc], axis=1)
-        # full_df.to_csv('convex_net_greeks.csv' if USE_CONVEX_NETWORK else 'pos_net_greeks.csv', index=False,
-        #                float_format='%.4f')
-        full_df.to_csv('greeks_test_pos_50.csv', index=False, float_format='%.4f')
+        # df_from_numpy = pd.DataFrame(x_test[:,:-2], columns=[*list(idx_to_col_name.values()), 'numeric_avg_type'])
+        # df_from_numpy['avg_type'] = df_from_numpy.apply(
+        #     lambda row: 'ARITHMETIC' if row.numeric_avg_type == 1 else 'GEOMETRIC', axis=1)
+        # greeks_mc = get_greeks(df_from_numpy)
+        # full_df = pd.concat([df_test, greeks, greeks_mc], axis=1)
+        # # full_df.to_csv('convex_net_greeks.csv' if USE_CONVEX_NETWORK else 'pos_net_greeks.csv', index=False,
+        # #                float_format='%.4f')
+        # full_df.to_csv('greeks_test_con_50.csv', index=False, float_format='%.4f')
 
 
 if __name__ == '__main__':

@@ -3,12 +3,10 @@ from typing import Tuple, List
 import numpy as np
 import pandas as pd
 import torch
-from sklearn.model_selection import train_test_split
 from torch import nn
 
 from settings import EPOCHS_COUNT, VERBOSE
 from utils.batches import get_batches
-from utils.plotting import create_chart
 from .modules.linear_positive import LinearPositive
 from .modules.linear_bias_positive import LinearBiasPositive
 

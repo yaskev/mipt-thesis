@@ -38,15 +38,15 @@ class SigmaNet:
             )
         elif net_type == SigmaNetType.MULTILAYER_POSITIVE:
             self.net = nn.Sequential(
-                nn.Linear(in_features, in_features + 128),
+                LinearPositive(in_features, in_features + 128),
                 nn.Sigmoid(),
-                nn.Linear(in_features + 128, in_features + 64),
+                LinearPositive(in_features + 128, in_features + 64),
                 nn.Sigmoid(),
-                nn.Linear(in_features + 64, in_features + 32),
+                LinearPositive(in_features + 64, in_features + 32),
                 nn.Sigmoid(),
-                nn.Linear(in_features + 32, in_features + 16),
+                LinearPositive(in_features + 32, in_features + 16),
                 nn.Sigmoid(),
-                nn.Linear(in_features + 16, in_features + 8),
+                LinearPositive(in_features + 16, in_features + 8),
                 nn.Sigmoid(),
                 LinearBiasPositive(in_features + 8, 1)
             )
