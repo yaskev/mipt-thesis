@@ -16,9 +16,9 @@ from utils.batches import get_batches
 class ConvexNet:
     def __init__(self, in_features: int, convex_indices: Tensor):
         self.net = nn.Sequential(
-            LinearNoSum(in_features, in_features + 3),
-            SoftSigmoid(convex_indices, in_features + 3),
-            LinearBiasPositive(in_features + 3, 1)
+            LinearNoSum(in_features, in_features * 8),
+            SoftSigmoid(convex_indices, in_features * 8),
+            LinearBiasPositive(in_features * 8, 1)
         )
         self.criterion = nn.MSELoss()
         self.optim = torch.optim.Adam(self.net.parameters(), lr=3e-4, betas=(0.9, 0.999), eps=1e-8)

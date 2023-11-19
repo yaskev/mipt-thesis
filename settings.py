@@ -12,7 +12,6 @@ PLOT_SOME_PATHS = False
 
 START_SHIFT = None # years
 
-
 # Random number generator seeds
 PATH_RANDOM_SEED = 42  # Set None not to fix seed
 OPTIONS_PARAMS_RANDOM_SEED = 123  # Set None not to fix seed
@@ -32,7 +31,7 @@ SAVE_TRAINED_NET = False
 # POSITIVE_MODEL_PATH = 'pos_new_mc_1000.sav'
 POSITIVE_MODEL_PATH = 'pos_lr_decay_19_11.sav'
 # POSITIVE_MODEL_PATH = 'trained_pos_doubles.sav'
-CONVEX_MODEL_PATH = 'conv_lr_decay_19_11.sav'
+CONVEX_MODEL_PATH = 'conv_lr_decay_19_11_x8.sav'
 # CONVEX_MODEL_PATH = 'trained_con_doubles.sav'
 SIGMA_MODEL_PATH = 'trained_sigma_shift.sav'
 
