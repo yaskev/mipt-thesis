@@ -14,12 +14,13 @@ from .modules.linear_bias_positive import LinearBiasPositive
 class OptionsNet:
     def __init__(self, in_features: int):
         self.net = nn.Sequential(
-            LinearPositive(in_features, in_features + 3),
+            LinearPositive(in_features, in_features * 8),
             nn.Sigmoid(),
-            LinearBiasPositive(in_features + 3, 1)
+            LinearBiasPositive(in_features * 8, 1)
         )
         self.criterion = nn.MSELoss()
         self.optim = torch.optim.Adam(self.net.parameters(), lr=3e-4, betas=(0.9, 0.999), eps=1e-8)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optim, gamma=0.997)
 
     def fit(self, x_train: np.ndarray, y_train: np.ndarray, x_val: np.ndarray, y_val: np.ndarray, analytics_mode: bool = False) -> Tuple[List[float], List[float]]:
         # x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2)
@@ -52,6 +53,8 @@ class OptionsNet:
                     loss = self.criterion.forward(predict, y.unsqueeze(1))
                     tmp_loss.append(loss.item())
                 val_loss.append(sum(tmp_loss) / len(tmp_loss))
+
+            self.scheduler.step()
 
         return train_loss, val_loss
 

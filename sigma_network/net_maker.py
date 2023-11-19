@@ -4,6 +4,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
+import settings
 from settings import USE_PRETRAINED_NET, SIGMA_MODEL_PATH
 from sigma_network.network import SigmaNet, SigmaNetType
 from utils.plotting import create_chart
@@ -32,6 +33,24 @@ def get_trained_net_and_test_set(df: pd.DataFrame, test_df: pd.DataFrame, test_s
         # if not analytics_mode:
         #     df['numeric_avg_type'] = df.apply(lambda row: 1 if row.avg_type == OptionAvgType.ARITHMETIC.value else 0,
         #                                       axis=1)
+
+        if settings.SUBTRACT_INTRINSIC_VALUE:
+            df['intr_value'] = df['one_year_mean'] - np.exp(-df['risk_free_rate'] * df['ttm'])
+            # df.loc[df['intr_value'] < 0, 'intr_value'] = 0
+            test_df['intr_value'] = test_df['one_year_mean'] - np.exp(-test_df['risk_free_rate'] * test_df['ttm'])
+            # test_df.loc[test_df['intr_value'] < 0, 'intr_value'] = 0
+
+            df['price_strike_ratio'] -= df['intr_value']
+            test_df['price_strike_ratio'] -= test_df['intr_value']
+
+            # Apply log transform
+            # df.loc[df['price_strike_ratio'] == 1, 'price_strike_ratio'] = 0.9999
+            # test_df.loc[test_df['price_strike_ratio'] == 1, 'price_strike_ratio'] = 0.9999
+            # df.loc[df['price_strike_ratio'] <= 0, 'price_strike_ratio'] = 0.0001
+            # test_df.loc[test_df['price_strike_ratio'] <= 0, 'price_strike_ratio'] = 0.0001
+            # df['price_strike_ratio'] = np.log(df['price_strike_ratio'])
+            # test_df['price_strike_ratio'] = np.log(test_df['price_strike_ratio'])
+
         df_values = df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'price_strike_ratio']].astype(
             np.float32).to_numpy()
         test_df_values = test_df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'price_strike_ratio']].astype(
@@ -40,10 +59,11 @@ def get_trained_net_and_test_set(df: pd.DataFrame, test_df: pd.DataFrame, test_s
     df_target = df['volatility'].astype(np.float32).to_numpy()
     test_df_target = test_df['volatility'].astype(np.float32).to_numpy()
 
-    # scaler = MinMaxScaler()
-    # scaler.fit(df_values)
-    # df_values = scaler.transform(df_values)
-    # test_df_values = scaler.transform(test_df_values)
+    if settings.SIGMA_USE_SCALER:
+        scaler = MinMaxScaler()
+        scaler.fit(df_values)
+        df_values = scaler.transform(df_values)
+        test_df_values = scaler.transform(test_df_values)
 
     if USE_PRETRAINED_NET:
         x_test = df_values
@@ -56,6 +76,8 @@ def get_trained_net_and_test_set(df: pd.DataFrame, test_df: pd.DataFrame, test_s
 
     net = SigmaNet(x_train.shape[1], net_type)
     train_loss, val_loss = net.fit(x_train, y_train, test_df_values, test_df_target, analytics_mode)
+    print(f'Train MSE: {train_loss[-1] ** 0.5}')
+    print(f'Val MSE: {val_loss[-1] ** 0.5}')
 
     if not analytics_mode:
         if not no_charts:

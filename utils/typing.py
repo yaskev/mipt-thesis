@@ -14,4 +14,4 @@ class NetType(Enum):
 class ComplexNetworkType(Enum):
     POSITIVE_NETWORK = 'positive_network'
     CONVEX_NETWORK = 'convex_network'
-    SIGMA_POSITIVE_NETWORK = 'sigma_positive_network'
+    SIGMA_NETWORK = 'sigma_network'
