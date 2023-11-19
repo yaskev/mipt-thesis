@@ -18,6 +18,11 @@ class OptionsNet:
             nn.Sigmoid(),
             LinearBiasPositive(in_features * 8, 1)
         )
+        # self.net = nn.Sequential(
+        #     nn.Linear(in_features, in_features * 8),
+        #     nn.Sigmoid(),
+        #     nn.Linear(in_features * 8, 1)
+        # )
         self.criterion = nn.MSELoss()
         self.optim = torch.optim.Adam(self.net.parameters(), lr=3e-4, betas=(0.9, 0.999), eps=1e-8)
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optim, gamma=0.997)

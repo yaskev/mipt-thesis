@@ -41,6 +41,7 @@ def _get_price(row) -> Tuple[float, float, float]:
                                    OptionAvgType(row.avg_type), row.ttm)
 
 def _get_price_after_shift(row) -> Tuple[float, float, float, float, float]:
+    # Experimental feature, do not use
     pre_path = generate_paths(settings.START_SHIFT, row.risk_free_rate, row.volatility, row.spot_strike_ratio, num_of_values=1)[0]
     new_spot_strike_ratio = pre_path[-1]
 

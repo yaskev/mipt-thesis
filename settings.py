@@ -18,9 +18,9 @@ OPTIONS_PARAMS_RANDOM_SEED = 123  # Set None not to fix seed
 
 # Neural networks
 DATASET_SIZE = 100000  # Used only when USE_DATA_FROM_FILE = False
-EPOCHS_COUNT = 200
+EPOCHS_COUNT = 500
 BATCH_SIZE = 256
-NETWORK_TYPE = ComplexNetworkType.CONVEX_NETWORK
+NETWORK_TYPE = ComplexNetworkType.POSITIVE_NETWORK
 
 # Sigma
 SUBTRACT_INTRINSIC_VALUE = False
@@ -29,7 +29,7 @@ SIGMA_USE_SCALER = False
 USE_PRETRAINED_NET = True
 SAVE_TRAINED_NET = False
 # POSITIVE_MODEL_PATH = 'pos_new_mc_1000.sav'
-POSITIVE_MODEL_PATH = 'pos_lr_decay_19_11.sav'
+POSITIVE_MODEL_PATH = 'pos_with_int_val.sav'
 # POSITIVE_MODEL_PATH = 'trained_pos_doubles.sav'
 CONVEX_MODEL_PATH = 'conv_lr_decay_19_11_x8.sav'
 # CONVEX_MODEL_PATH = 'trained_con_doubles.sav'
