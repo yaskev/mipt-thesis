@@ -43,3 +43,6 @@ MSE train: 1.91e-02, val MSE: 2.17e-02
 Training chart: positive_network/charts/pos_intr_no_log.jpg
 
 ### Trained FF 4-layer net with no preprocessing 
+pos_ffnn_no_preproc_25k_epoch.sav
+MSE train: 1.49e-03, MSE val: 1.36e-03
+Training chart: positive_network/charts/pos_ffnn_no_preproc_25k_epoch.jpg
