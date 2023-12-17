@@ -37,6 +37,12 @@ MSE train: 2.81e-03, val MSE: 1.45e-02
 Training chart: positive_network/charts/pos_intr_log_20k_paths_overfit_17_12.jpg
 This is a usual FF network with 4 linear layers
 
+### Trained (no overfit, limit to 1100 epochs) net using accurate data from part 2 and preprocessing with intrinsic value subtraction and log
+pos_ffnn_intr_val_log_no_overfit_1100_epochs.sav
+MSE train: 1.26e-2, val MSE: 1.45e-02
+Training chart: positive_network/charts/pos_ffnn_intr_val_log_no_overfit_1100_epochs.jpg
+This is a usual FF network with 4 linear layers
+
 ### Trained pos net using accurate data with subtracted intrinsic value, without log
 pos_intr_no_log.sav
 MSE train: 1.91e-02, val MSE: 2.17e-02
