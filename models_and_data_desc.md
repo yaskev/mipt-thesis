@@ -28,7 +28,7 @@ trained_convex.sav
 
 ### Trained positive network using accurate data from part 2
 pos_no_preproc_20k_paths_17_12.sav
-MSE: 1.17e-2
+MSE: 1.17e-2, val RMSE: 1.15e-2
 Training chart: positive_network/charts/pos_no_preproc_20k_paths_17_12.jpg
 
 ### Trained (and overfitted) net using accurate data from part 2 and preprocessing with intrinsic value subtraction and log
@@ -36,3 +36,10 @@ pos_intr_log_20k_paths_overfit_17_12.sav
 MSE train: 2.81e-03, val MSE: 1.45e-02
 Training chart: positive_network/charts/pos_intr_log_20k_paths_overfit_17_12.jpg
 This is a usual FF network with 4 linear layers
+
+### Trained pos net using accurate data with subtracted intrinsic value, without log
+pos_intr_no_log.sav
+MSE train: 1.91e-02, val MSE: 2.17e-02
+Training chart: positive_network/charts/pos_intr_no_log.jpg
+
+### Trained FF 4-layer net with no preprocessing 
