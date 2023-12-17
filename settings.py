@@ -26,10 +26,10 @@ NETWORK_TYPE = ComplexNetworkType.POSITIVE_NETWORK
 SUBTRACT_INTRINSIC_VALUE = False
 SIGMA_USE_SCALER = False
 
-USE_PRETRAINED_NET = True
+USE_PRETRAINED_NET = False
 SAVE_TRAINED_NET = False
 # POSITIVE_MODEL_PATH = 'pos_new_mc_1000.sav'
-POSITIVE_MODEL_PATH = 'pos_with_int_val.sav'
+POSITIVE_MODEL_PATH = 'pos_ffnn_no_preproc.sav'
 # POSITIVE_MODEL_PATH = 'trained_pos_doubles.sav'
 CONVEX_MODEL_PATH = 'conv_lr_decay_19_11_x8.sav'
 # CONVEX_MODEL_PATH = 'trained_con_doubles.sav'

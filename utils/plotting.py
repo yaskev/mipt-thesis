@@ -66,5 +66,5 @@ def plot_many_paths(paths: np.ndarray, strict_path: str):
     plt.ylabel('Price')
     plt.yscale('log')
     plt.grid()
-    plt.title('Paths, scale=log', fontsize=18)
-    plt.savefig(os.path.join(strict_path, f'{datetime.now()}.jpg'))
+    # plt.title('MPaths, scale=log', fontsize=18)
+    plt.savefig(os.path.join(strict_path, f'{datetime.now()}.svg'))
