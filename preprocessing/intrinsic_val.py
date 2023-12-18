@@ -29,9 +29,9 @@ def encode(df: pd.DataFrame) -> pd.DataFrame:
     df = add_subtracted_intrinsic_value(df)
     df['price_strike_ratio'] = df['subtracted_int_val']
     df = df.drop(columns='subtracted_int_val')
-    df.loc[df['price_strike_ratio'] <= 0, 'price_strike_ratio'] = 0.00001
+    # df.loc[df['price_strike_ratio'] <= 0, 'price_strike_ratio'] = 0.00001
     # df['price_strike_ratio'] = np.log(df['price_strike_ratio']) + ADD_VALUE_TO_LOG
-    df['price_strike_ratio'] = np.log(df['price_strike_ratio'])
+    # df['price_strike_ratio'] = np.log(df['price_strike_ratio'])
 
     return df
 
