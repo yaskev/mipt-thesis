@@ -105,18 +105,18 @@ if __name__ == '__main__':
     # price tol 5e-4: MSE 0.117 (step 0.001)
     # price tol 0: MSE 0.144
     #
+    # FF net with intr value subtraction and log
+    # price tol (log): 0.9, MSE: 0.136
+    #
+    # Trained (and overfitted) net using accurate data from part 2 and preprocessing with intrinsic value subtraction and log
+    # price tol: 1.6, MSE: 0.16
+    #
     # Pos net, without intr values (no preprocessing)
     # price tol 1e-2: MSE 0.23
     # closer to predicting mean => better quality
     #
-    # FF net with intr value subtraction and log
-    # price tol (log): 0.9, MSE: 0.136
-    #
-    # Trained pos net using accurate data with subtracted intrinsic value, without log
+    # Pos net using accurate data with subtracted intrinsic value, without log
     # price tol: 2e-2, MSE: 0.259
-    #
-    # Trained (and overfitted) net using accurate data from part 2 and preprocessing with intrinsic value subtraction and log
-    # price tol: 1.6, MSE: 0.16
     #
     #
     #
@@ -125,17 +125,17 @@ if __name__ == '__main__':
     # FF net without intr values
     # price tol: 2.6e-3, MSE: 9.15e-2
     #
-    # Pos net, without intr values (no preprocessing)
-    # price tol: 1.6e-2, MSE: 0.126
-    #
     # FF net with intr value subtraction and log
     # price tol (log): 3.0, MSE 9.62e-2
     #
-    # Trained pos net using accurate data with subtracted intrinsic value, without log
-    # price tol: any, MSE: 1.44e-1 (mean vol)
-    #
     # Trained (and overfitted) net using accurate data from part 2 and preprocessing with intrinsic value subtraction and log
     # price tol: 1.5 (log), MSE 9.47e-2
+    #
+    # Pos net, without intr values (no preprocessing)
+    # price tol: 1.6e-2, MSE: 0.126
+    #
+    # Pos net using accurate data with subtracted intrinsic value, without log
+    # price tol: any, MSE: 1.44e-1 (mean vol)
 
     price_tols = [2.6e-3]
 
