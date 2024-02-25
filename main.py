@@ -12,6 +12,7 @@ from monte_carlo.path_generator import plot_paths
 from positive_network.net_maker import get_trained_net_and_test_set as get_positive_net_and_test_set
 from convex_network.net_maker import get_trained_net_and_test_set as get_convex_net_and_test_set
 from sigma_network.net_maker import get_trained_net_and_test_set as get_sigma_positive_net_and_test_set
+from semipositive_network.net_maker import get_trained_net_and_test_set as get_semipositive_net_and_test_set
 from settings import USE_DATA_FROM_FILE, DATASET_SIZE, FIXED_AVG_TYPE, PLOT_SOME_PATHS, CALC_GREEKS, \
     SAVE_TRAINED_NET, NETWORK_TYPE, WITH_CI_STATS
 from sigma_network.network import SigmaNetType
@@ -59,17 +60,26 @@ def make_predicted_vol_df(x_test: list, y_test: list, predict_vol: np.ndarray, f
 def main():
     if USE_DATA_FROM_FILE:
         # df = pd.read_csv('datasets/train/prices_mc_with_ci.csv')
-        test_df = pd.read_csv('datasets/train/prices_mc_with_ci.csv')
-        df = pd.read_csv('datasets/test/prices_mc_with_ci.csv')
+        # df = pd.read_csv('datasets/train/prices_mc_with_ci.csv')
+        # test_df = pd.read_csv('datasets/test/prices_mc_with_ci.csv')
 
+        # df = pd.read_csv('prices_mc_20000_paths_5000.csv')
+        #
+        # df = df[df['avg_type'] == OptionAvgType.ARITHMETIC.value]
+
+        df = pd.read_csv('prices_mc_mn_up_to_0.95.csv')
+
+        # df = pd.read_csv('prices_mc_mn_from_1.csv')
         df = df[df['avg_type'] == OptionAvgType.ARITHMETIC.value]
-        test_df = test_df[test_df['avg_type'] == OptionAvgType.ARITHMETIC.value]
+        # test_df = pd.read_csv('prices_mc_20k_test_paths_1000.csv')
+        # test_df = test_df[test_df['avg_type'] == OptionAvgType.ARITHMETIC.value]
 
         df = preprocessing.intrinsic_val.encode(df)
-        test_df = preprocessing.intrinsic_val.encode(test_df)
-
-        df.to_csv('tmp.csv', index=False, float_format='%.4f')
-        # df = df[df['avg_type'] == OptionAvgType.ARITHMETIC.value]
+        test_df = df
+        # test_df = preprocessing.intrinsic_val.encode(test_df)
+        # test_df.to_csv('subtr.csv', index=False, float_format='%.4f')
+        #
+        # df.to_csv('tmp.csv', index=False, float_format='%.4f')
         # df = preprocessing.intrinsic_val.add_subtracted_intrinsic_value(
         #     df
         # )
@@ -91,16 +101,20 @@ def main():
         # test_df = pd.read_csv('datasets/mc_fixed/prices_mc_fixed_test.csv')
     else:
         df = create_dataset(DATASET_SIZE)
-        test_df = df
-        df.to_csv('prices_mc_fixed_train.csv', index=False, float_format='%.4f')
+        # test_df = df
+        df.to_csv('prices_mc_mn_from_1.csv', index=False, float_format='%.4f')
+        return
 
     if PLOT_SOME_PATHS:
         plot_paths(df.iloc[:5, :])
 
     if NETWORK_TYPE == ComplexNetworkType.CONVEX_NETWORK:
-        net, x_test, y_test = get_convex_net_and_test_set(df, test_df, test_size=0.1, fixed_avg_type=FIXED_AVG_TYPE)
+        net, x_test, y_test, x_val, y_val = get_convex_net_and_test_set(df, test_df, test_size=1, fixed_avg_type=FIXED_AVG_TYPE)
     elif NETWORK_TYPE == ComplexNetworkType.POSITIVE_NETWORK:
-        net, x_test, y_test = get_positive_net_and_test_set(df, test_df, test_size=1, fixed_avg_type=FIXED_AVG_TYPE)
+        net, x_test, y_test, x_val, y_val = get_positive_net_and_test_set(df, test_df, test_size=1, fixed_avg_type=FIXED_AVG_TYPE)
+    elif NETWORK_TYPE == ComplexNetworkType.SEMIPOSITIVE_NETWORK:
+        net, x_test, y_test, x_val, y_val = get_semipositive_net_and_test_set(df, test_df, test_size=0.1,
+                                                                          fixed_avg_type=FIXED_AVG_TYPE)
     else:
         net, x_test, y_test = get_sigma_positive_net_and_test_set(df, test_df, test_size=0.1,
                                                                   fixed_avg_type=FIXED_AVG_TYPE,
@@ -117,29 +131,34 @@ def main():
 
     t = []
     predict_price = None
+    predict_val_price = None
     for _ in range(1):
         start = time.process_time()
         if WITH_CI_STATS:
             predict_price = net.predict(x_test[:,:-2]).detach().numpy()
+            predict_val_price = net.predict(x_val[:,:-2]).detach().numpy()
         else:
             predict_price = net.predict(x_test).detach().numpy()
+            predict_val_price = net.predict(x_val).detach().numpy()
         t.append(time.process_time() - start)
     print(sum(t) / len(t))
 
     df_test = make_predicted_df(x_test, y_test, predict_price, fixed_avg_type=FIXED_AVG_TYPE)
+    df_val = make_predicted_df(x_val, y_val, predict_val_price, fixed_avg_type=FIXED_AVG_TYPE)
 
     df_test = preprocessing.intrinsic_val.decode(df_test)
+    df_val = preprocessing.intrinsic_val.decode(df_val)
 
-    df_test.to_csv('convex_net_prices.csv' if NETWORK_TYPE == ComplexNetworkType.CONVEX_NETWORK
-                   else 'pos_net_prices.csv', index=False, float_format='%.4f')
+    df_test.to_csv(f'{get_file_name()}.csv', index=False, float_format='%.4f')
     print('RMSE: {:.2e}'.format(((df_test["monte_carlo_price"] - df_test["net_price"]) ** 2).mean() ** 0.5))
+    print('Val RMSE: {:.2e}'.format(((df_val["monte_carlo_price"] - df_val["net_price"]) ** 2).mean() ** 0.5))
 
     if WITH_CI_STATS:
         in_ci = (df_test['net_price'] < df_test['right_ci']) * (df_test['net_price'] > df_test['left_ci'])
         print(in_ci.mean())
 
     if SAVE_TRAINED_NET:
-        joblib.dump(net, 'pos_with_int_val.sav')
+        joblib.dump(net, 'neg_net_1+.sav')
 
     if CALC_GREEKS:
         t = []
@@ -159,6 +178,15 @@ def main():
         # #                float_format='%.4f')
         # full_df.to_csv('greeks_test_con_50.csv', index=False, float_format='%.4f')
 
+def get_file_name() -> str:
+    if NETWORK_TYPE == ComplexNetworkType.CONVEX_NETWORK:
+        return 'convex_net_prices'
+    if NETWORK_TYPE == ComplexNetworkType.POSITIVE_NETWORK:
+        return 'pos_net_prices'
+    if NETWORK_TYPE == ComplexNetworkType.SEMIPOSITIVE_NETWORK:
+        return 'semipos_net_prices'
+
+    return 'unknown_net_prices'
 
 if __name__ == '__main__':
     main()

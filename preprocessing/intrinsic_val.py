@@ -39,12 +39,12 @@ def decode(df: pd.DataFrame) -> pd.DataFrame:
     df['int_val'] = df.apply(_get_price_without_int_val, axis=1)
 
     # df['monte_carlo_price'] = np.exp(df['monte_carlo_price'] - ADD_VALUE_TO_LOG)
-    df['monte_carlo_price'] = np.exp(df['monte_carlo_price'])
-    df['monte_carlo_price'] += df['int_val']
+    # df['monte_carlo_price'] = np.exp(df['monte_carlo_price'])
+    df['monte_carlo_price'] = df['monte_carlo_price'] + df['int_val']
 
     # df['net_price'] = np.exp(df['net_price'] - ADD_VALUE_TO_LOG)
-    df['net_price'] = np.exp(df['net_price'])
-    df['net_price'] += df['int_val']
+    # df['net_price'] = np.exp(df['net_price'])
+    df['net_price'] = df['net_price'] + df['int_val']
 
     df = df.drop(columns='int_val')
 

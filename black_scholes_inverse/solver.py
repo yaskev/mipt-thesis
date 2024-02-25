@@ -137,7 +137,7 @@ if __name__ == '__main__':
     # Pos net using accurate data with subtracted intrinsic value, without log
     # price tol: any, MSE: 1.44e-1 (mean vol)
 
-    price_tols = [2.6e-3]
+    price_tols = [1e-2]
 
     for tol in price_tols:
         print(tol)
@@ -147,9 +147,10 @@ if __name__ == '__main__':
         ITER_NUM = 0
 
         df = pd.read_csv(os.path.join(PATH_PREFIX, 'prices_mc_20000_paths_5000.csv'))
+        # df = pd.read_csv(os.path.join(PATH_PREFIX, 'datasets/train/prices_mc_with_ci.csv'))
         df = df[df['avg_type'] == OptionAvgType.ARITHMETIC.value]
         solver = Solver(POSITIVE_MODEL_PATH, vol_tol=1e-5, price_tol=tol, lower_vol=0.05, upper_vol=0.55, use_bin_search=False)
-        df = solver.predict_vol(df, apply_preproc=False)
+        df = solver.predict_vol(df, apply_preproc=True)
 
         print('MSE: {:.2e}'.format(((df["volatility"] - df["predicted_vol"]) ** 2).mean() ** 0.5))
         df[['volatility', 'predicted_vol']].to_csv('predict_vol.csv', index=False, float_format='%.4f')

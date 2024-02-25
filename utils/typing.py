@@ -15,3 +15,4 @@ class ComplexNetworkType(Enum):
     POSITIVE_NETWORK = 'positive_network'
     CONVEX_NETWORK = 'convex_network'
     SIGMA_NETWORK = 'sigma_network'
+    SEMIPOSITIVE_NETWORK = 'semipositive_network'

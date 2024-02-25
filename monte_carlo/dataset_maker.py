@@ -9,18 +9,35 @@ from settings import OPTIONS_PARAMS_RANDOM_SEED
 from .path_generator import generate_paths
 from .pricer import get_option_price_and_ci
 from utils.typing import OptionAvgType
+from scipy.stats import beta
 
 
 def create_dataset(entries_cnt: int) -> pd.DataFrame:
     rng = default_rng(OPTIONS_PARAMS_RANDOM_SEED)
+    # data = {
+    #     'spot_strike_ratio': 0.5 + beta.rvs(0.5, 0.5, size=entries_cnt) * 1.5,
+    #     'ttm': 0.5 + beta.rvs(0.5, 0.5, size=entries_cnt) * 1,
+    #     'risk_free_rate': 0 + beta.rvs(0.5, 0.5, size=entries_cnt) * 0.2,
+    #     'volatility': 0.05 + beta.rvs(0.5, 0.5, size=entries_cnt) * 0.5,
+    #     'avg_type': [OptionAvgType.ARITHMETIC.value for _ in range(entries_cnt)],
+    # }
+
+    # data = {
+    #     'spot_strike_ratio': 0.5 + rng.random(entries_cnt) * 0.45,
+    #     'ttm': 0.5 + rng.random(entries_cnt) * 1,
+    #     'risk_free_rate': 0 + rng.random(entries_cnt) * 0.05,
+    #     'volatility': 0.05 + rng.random(entries_cnt) * 0.5,
+    #     'avg_type': [OptionAvgType.ARITHMETIC.value for _ in range(entries_cnt)],
+    # }
+
     data = {
-        'spot_strike_ratio': 0.5 + rng.random(entries_cnt) * 1.5,
+        'spot_strike_ratio': 1 + rng.random(entries_cnt) * 0.5,
         'ttm': 0.5 + rng.random(entries_cnt) * 1,
         'risk_free_rate': 0 + rng.random(entries_cnt) * 0.2,
         'volatility': 0.05 + rng.random(entries_cnt) * 0.5,
-        'avg_type': [OptionAvgType.ARITHMETIC.value if rng.random() >= 0.5 else OptionAvgType.GEOMETRIC.value
-                     for _ in range(entries_cnt)],
+        'avg_type': [OptionAvgType.ARITHMETIC.value for _ in range(entries_cnt)],
     }
+
     df = pd.DataFrame(data=data)
 
     if settings.START_SHIFT:
