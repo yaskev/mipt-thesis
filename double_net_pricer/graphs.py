@@ -34,7 +34,7 @@ def create_convexity_plots(pricer: DoubleNetPricer):
 
 if __name__ == '__main__':
     left_model = joblib.load('models/left-2024-02-26 00:32:11.761148.sav')
-    right_model = joblib.load('models/right-2024-02-26 00:38:43.414567.sav')
+    right_model = joblib.load('models/right-2024-02-26 01:56:32.769465.sav')
     pricer = DoubleNetPricer(left_model, right_model)
 
     create_convexity_plots(pricer)

@@ -16,9 +16,7 @@ class OptionsNet:
         self.net = nn.Sequential(
             LinearSemiPositive(in_features, 256),
             nn.Sigmoid(),
-            LinearSemiPositive(256, 32),
-            nn.Sigmoid(),
-            LinearBiasPositive(32, 1)
+            LinearBiasPositive(256, 1)
         )
         self.criterion = nn.MSELoss()
         self.optim = torch.optim.Adam(self.net.parameters(), lr=3e-4, betas=(0.9, 0.999), eps=1e-8)

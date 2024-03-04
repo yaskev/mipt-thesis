@@ -6,7 +6,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from double_net_pricer.intrinsic import get_threshold, encode_left, encode_right, decode_left, decode_right, only_special_decode
+from double_net_pricer.intrinsic import get_threshold, encode_right, decode_right, only_special_decode
 from main import make_predicted_df
 from positive_network.network import OptionsNet as PositiveNet
 from semipositive_network.network import OptionsNet as SemiPositiveNet
@@ -17,8 +17,6 @@ IN_FEATURES_NUM = 4
 
 
 # TODO: Use different number of averaging steps for different ttm (not always 365)
-# TODO: Delete avg type
-# Only ARITHMETIC averaging is supported
 
 class DoubleNetPricer:
     def __init__(self, left_net, right_net):
@@ -37,8 +35,6 @@ class DoubleNetPricer:
         left_df, right_df = self._split_for_left_and_right_net_df(df)
         left_val_df, right_val_df = self._split_for_left_and_right_net_df(val_df)
 
-        left_df = encode_left(left_df)
-        left_val_df = encode_left(left_val_df)
         right_df = encode_right(right_df)
         right_val_df = encode_right(right_val_df)
 
@@ -72,7 +68,6 @@ class DoubleNetPricer:
     # Target field: 'price_strike_ratio'
     def predict_split(self, df: pd.DataFrame, no_decode=False):
         left_df, right_df = self._split_for_left_and_right_net_df(df)
-        left_df = encode_left(left_df)
         right_df = encode_right(right_df)
 
         left_df_values = left_df[
@@ -91,7 +86,6 @@ class DoubleNetPricer:
         right_answer_df = make_predicted_df(right_df_values, right_df_target, right_prices, fixed_avg_type=OptionAvgType.ARITHMETIC)
 
         if not no_decode:
-            left_answer_df = decode_left(left_answer_df)
             right_answer_df = decode_right(right_answer_df)
         else:
             right_answer_df = only_special_decode(right_answer_df)
@@ -119,13 +113,14 @@ class DoubleNetPricer:
 
 
 if __name__ == '__main__':
-    # left_model = joblib.load('models/left-2024-02-25 23:36:56.030564.sav')
-    pricer = DoubleNetPricer(None, None)
+    left_model = joblib.load('models/left-2024-02-26 00:32:11.761148.sav')
+    right_model = joblib.load('models/right-2024-02-26 01:56:32.769465.sav')
+    pricer = DoubleNetPricer(left_model, right_model)
 
     train_df = pd.read_csv('../prices_mc_20000_paths_5000.csv')
     test_df = pd.read_csv('../prices_mc_20k_test_paths_1000.csv')
 
-    pricer.fit(train_df, test_df)
+    # pricer.fit(train_df, test_df, which='right')
 
     df_test_left, df_test_right = pricer.predict_split(test_df)
     df_train_left, df_train_right = pricer.predict_split(train_df)
