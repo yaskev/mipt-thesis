@@ -10,8 +10,8 @@ from settings import NUMBER_OF_STEPS
 
 def create_chart(train_loss: List[float], val_loss: List[float], folder: str, tag: str = '', strict_path: str = None):
     plt.figure(figsize=(8, 6))
-    plt.plot(np.arange(len(train_loss)), train_loss, label='Train')
     plt.plot(np.arange(len(val_loss)), val_loss, label='Validation')
+    plt.plot(np.arange(len(train_loss)), train_loss, label='Train')
     plt.xlabel('Epoch number')
     plt.ylabel('Loss')
     plt.grid()

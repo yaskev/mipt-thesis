@@ -6,7 +6,8 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from double_net_pricer.intrinsic import get_threshold, encode_right, decode_right, only_special_decode
+from double_net_pricer.intrinsic import get_threshold, encode_right, decode_right, right_special_encode_decode, \
+    log_price_decode, log_price_encode
 from main import make_predicted_df
 from positive_network.network import OptionsNet as PositiveNet
 from semipositive_network.network import OptionsNet as SemiPositiveNet
@@ -37,6 +38,8 @@ class DoubleNetPricer:
 
         right_df = encode_right(right_df)
         right_val_df = encode_right(right_val_df)
+        left_df = log_price_encode(left_df)
+        left_val_df = log_price_encode(left_val_df)
 
         left_df_values = left_df[['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility']].astype(
             np.float32).to_numpy()
@@ -68,6 +71,7 @@ class DoubleNetPricer:
     # Target field: 'price_strike_ratio'
     def predict_split(self, df: pd.DataFrame, no_decode=False):
         left_df, right_df = self._split_for_left_and_right_net_df(df)
+        left_df = log_price_encode(left_df)
         right_df = encode_right(right_df)
 
         left_df_values = left_df[
@@ -88,7 +92,9 @@ class DoubleNetPricer:
         if not no_decode:
             right_answer_df = decode_right(right_answer_df)
         else:
-            right_answer_df = only_special_decode(right_answer_df)
+            right_answer_df = log_price_decode(right_special_encode_decode(right_answer_df))
+
+        left_answer_df = log_price_decode(left_answer_df)
 
         return left_answer_df, right_answer_df
 
@@ -113,14 +119,14 @@ class DoubleNetPricer:
 
 
 if __name__ == '__main__':
-    left_model = joblib.load('models/left-2024-02-26 00:32:11.761148.sav')
-    right_model = joblib.load('models/right-2024-02-26 01:56:32.769465.sav')
+    left_model = joblib.load('models/left-2024-03-04 15:40:51.111126.sav')
+    right_model = joblib.load('models/right-2024-03-04 14:56:56.240905.sav')
     pricer = DoubleNetPricer(left_model, right_model)
 
     train_df = pd.read_csv('../prices_mc_20000_paths_5000.csv')
     test_df = pd.read_csv('../prices_mc_20k_test_paths_1000.csv')
 
-    # pricer.fit(train_df, test_df, which='right')
+    pricer.fit(train_df, test_df, which='left')
 
     df_test_left, df_test_right = pricer.predict_split(test_df)
     df_train_left, df_train_right = pricer.predict_split(train_df)

@@ -14,9 +14,9 @@ from .modules.linear_bias_positive import LinearBiasPositive
 class OptionsNet:
     def __init__(self, in_features: int):
         self.net = nn.Sequential(
-            LinearPositive(in_features, in_features * 8),
+            LinearPositive(in_features, 256),
             nn.Sigmoid(),
-            LinearBiasPositive(in_features * 8, 1)
+            LinearBiasPositive(256, 1)
         )
         # self.net = nn.Sequential(
         #     nn.Linear(in_features, in_features * 32),
@@ -29,6 +29,7 @@ class OptionsNet:
         # )
         self.criterion = nn.MSELoss()
         self.optim = torch.optim.Adam(self.net.parameters(), lr=3e-4, betas=(0.9, 0.999), eps=1e-8)
+        # self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optim, gamma=0.99985)
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optim, gamma=1)
         # self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optim, 'min', factor=0.5, patience=100)
 
@@ -48,6 +49,11 @@ class OptionsNet:
                 self.optim.zero_grad()
                 predict = self.net.forward(x)
                 loss = self.criterion.forward(predict, y.unsqueeze(1))
+
+                l1_lambda = 3e-4
+                l1_norm = sum(torch.linalg.norm(p, 1) for p in self.net.parameters())
+                loss += l1_lambda * l1_norm
+
                 loss.backward()
                 self.optim.step()
                 tmp_loss.append(loss.item())
@@ -61,6 +67,11 @@ class OptionsNet:
                     y = torch.from_numpy(y_batch)
                     predict = self.net.forward(x)
                     loss = self.criterion.forward(predict, y.unsqueeze(1))
+
+                    l1_lambda = 3e-4
+                    l1_norm = sum(torch.linalg.norm(p, 1) for p in self.net.parameters())
+                    loss += l1_lambda * l1_norm
+
                     tmp_loss.append(loss.item())
                 val_loss.append(sum(tmp_loss) / len(tmp_loss))
 
