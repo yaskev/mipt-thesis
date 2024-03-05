@@ -20,7 +20,7 @@ class OptionsNet:
         )
         self.criterion = nn.MSELoss()
         self.optim = torch.optim.Adam(self.net.parameters(), lr=3e-4, betas=(0.9, 0.999), eps=1e-8)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optim, gamma=0.99985)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optim, gamma=1)
 
     def fit(self, x_train: np.ndarray, y_train: np.ndarray, x_val: np.ndarray, y_val: np.ndarray, analytics_mode: bool = False) -> Tuple[List[float], List[float]]:
         # x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2)
@@ -38,6 +38,11 @@ class OptionsNet:
                 self.optim.zero_grad()
                 predict = self.net.forward(x)
                 loss = self.criterion.forward(predict, y.unsqueeze(1))
+
+                l1_lambda = 3e-4
+                l1_norm = sum(torch.linalg.norm(p, 1) for p in self.net.parameters())
+                loss += l1_lambda * l1_norm
+
                 loss.backward()
                 self.optim.step()
                 tmp_loss.append(loss.item())
@@ -51,6 +56,11 @@ class OptionsNet:
                     y = torch.from_numpy(y_batch)
                     predict = self.net.forward(x)
                     loss = self.criterion.forward(predict, y.unsqueeze(1))
+
+                    l1_lambda = 3e-4
+                    l1_norm = sum(torch.linalg.norm(p, 1) for p in self.net.parameters())
+                    loss += l1_lambda * l1_norm
+
                     tmp_loss.append(loss.item())
                 val_loss.append(sum(tmp_loss) / len(tmp_loss))
 
