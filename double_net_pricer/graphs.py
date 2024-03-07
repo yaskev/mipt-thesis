@@ -14,9 +14,17 @@ file_idx_to_col = {
     7: 'volatility'
 }
 
-def create_convexity_plots(pricer: DoubleNetPricer):
+param_to_col = {
+    'rate': 'risk_free_rate',
+    'spot': 'spot_strike_ratio',
+    'ttm': 'ttm',
+    'vol': 'volatility',
+}
+
+def create_convexity_plots(pricer: DoubleNetPricer, task: str):
+    postfix = '' if task == 'normal' else '_low'
     for i in range(1, 8):
-        df = pd.read_csv(f'datasets_for_graphs/{i}.csv')
+        df = pd.read_csv(f'datasets_for_graphs/{i}{postfix}.csv')
         predicted_df = pricer.predict(df, no_decode=True)
 
         predicted_df.sort_values(file_idx_to_col[i], inplace=True)
@@ -29,12 +37,32 @@ def create_convexity_plots(pricer: DoubleNetPricer):
         plt.xlabel(f'{file_idx_to_col[i]}', fontsize=18)
         plt.ylabel('Price/strike ratio', fontsize=18)
         plt.legend(fontsize=18)
-        plt.savefig(f'graphs/{i}.jpg')
+        plt.savefig(f'graphs/{i}{postfix}.jpg')
+
+    # if task == 'low':
+    #     for param in ['rate', 'spot', 'ttm', 'vol']:
+    #         df = pd.read_csv(f'datasets_for_graphs/low_ttm_fixed_{param}.csv')
+    #         predicted_df = pricer.predict(df, no_decode=True)
+    #
+    #         predicted_df.sort_values(param_to_col[param], inplace=True)
+    #
+    #         plt.figure(figsize=(12, 8))
+    #         plt.grid()
+    #         plt.plot(predicted_df[param_to_col[param]], predicted_df['monte_carlo_price'], linewidth=2, label='MC')
+    #         plt.plot(predicted_df[param_to_col[param]], predicted_df['net_price'], linewidth=2, label='Positive net')
+    #         plt.title(f'Price by {param_to_col[param].lower()}. Moneyness={1.1}', fontsize=20)
+    #         plt.xlabel(f'{param_to_col[param]}', fontsize=18)
+    #         plt.ylabel('Price/strike ratio', fontsize=18)
+    #         plt.legend(fontsize=18)
+    #         plt.savefig(f'graphs/{param}.jpg')
 
 
 if __name__ == '__main__':
-    left_model = joblib.load('models/left-2024-03-05 16:16:25.028609.sav')
-    right_model = joblib.load('models/right-2024-03-05 16:10:21.678640.sav')
+    # TASK = 'normal'
+    TASK = 'low'
+
+    left_model = joblib.load('models/left-2024-03-07 00:07:51.913952.sav')
+    right_model = joblib.load('models/right-2024-03-07 00:15:22.510157.sav')
     pricer = DoubleNetPricer(left_model, right_model)
 
-    create_convexity_plots(pricer)
+    create_convexity_plots(pricer, TASK)

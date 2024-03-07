@@ -102,7 +102,7 @@ def main():
     else:
         df = create_dataset(DATASET_SIZE)
         # test_df = df
-        df.to_csv('train_1_20000_paths_5000.csv', index=False, float_format='%.4f')
+        df.to_csv('test_5_ttm_003_to_053_20000_paths_1000.csv', index=False, float_format='%.4f')
         return
 
     if PLOT_SOME_PATHS:

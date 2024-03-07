@@ -4,7 +4,7 @@ from utils.typing import ComplexNetworkType, OptionAvgType
 USE_DATA_FROM_FILE = False
 
 # Monte Carlo parameters
-NUMBER_OF_PATHS = 20000
+NUMBER_OF_PATHS = 4000
 NUMBER_OF_STEPS = 365
 CONFIDENCE_INTERVAL = 0.95
 USE_ANTITHETIC_VARIATES = True
@@ -17,7 +17,7 @@ PATH_RANDOM_SEED = 42  # Set None not to fix seed
 OPTIONS_PARAMS_RANDOM_SEED = 123  # Set None not to fix seed
 
 # Neural networks
-DATASET_SIZE = 5000  # Used only when USE_DATA_FROM_FILE = False
+DATASET_SIZE = 1000  # Used only when USE_DATA_FROM_FILE = False
 EPOCHS_COUNT = 10000
 BATCH_SIZE = 256
 NETWORK_TYPE = ComplexNetworkType.POSITIVE_NETWORK
