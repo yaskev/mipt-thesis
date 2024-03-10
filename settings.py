@@ -18,7 +18,7 @@ OPTIONS_PARAMS_RANDOM_SEED = 123  # Set None not to fix seed
 
 # Neural networks
 DATASET_SIZE = 1000  # Used only when USE_DATA_FROM_FILE = False
-EPOCHS_COUNT = 10000
+EPOCHS_COUNT = 3000
 BATCH_SIZE = 256
 NETWORK_TYPE = ComplexNetworkType.POSITIVE_NETWORK
 

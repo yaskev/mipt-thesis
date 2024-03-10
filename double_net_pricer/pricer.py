@@ -164,21 +164,26 @@ if __name__ == '__main__':
     TASK = 'price'
     # TASK = 'real'
     # TASK = 'convex_price'
+    # TASK = 'none'
 
-    left_model = joblib.load('models/left-2024-03-07 00:30:38.864635.sav')
-    right_model = joblib.load('models/right-2024-03-07 00:32:00.639826.sav')
+    left_model = joblib.load('convex/models/left-2024-03-08 00:22:27.197058.sav')
+    right_model = joblib.load('convex/models/right-2024-03-08 00:43:26.658967.sav')
+    convex = True
 
-    pricer = DoubleNetPricer(None, None)
+    pricer = DoubleNetPricer(None, None, convex=convex)
 
     # real_df = pd.read_csv('../datasets/barchart ulsd/31_07_24_fixed.csv')
     train_df = pd.read_csv('../datasets/double_pricer/train_4_ttm_003_to_053_20000_paths_5000.csv')
-    second_train_df = pd.read_csv('../datasets/double_pricer/train_4_ttm_003_to_053_20000_paths_5000.csv')
+
+    second_train_df = pd.read_csv('../datasets/double_pricer/train_5_ttm_003_to_053_20000_paths_5000.csv')
+    # extra_df = pd.read_csv('../datasets/double_pricer/train_1_20000_paths_5000.csv')
+    # extra_df = extra_df[extra_df['ttm'] < 1]
     train_df = pd.concat([train_df, second_train_df])
     test_df = pd.read_csv('../datasets/double_pricer/test_2_ttm_003_to_053_20000_paths_1000.csv')
 
     if TASK == 'real':
-        for date in ['28_03_24', '30_04_24', '31_05_24', '28_06_24', '31_07_24']:
-        # for date in ['28_06_24_v2', '30_04_24_v2', '28_03_24_v2', '31_05_24_v2', '31_07_24_v2']:  #['28_03_24', '30_04_24', '31_05_24', '28_06_24', '31_07_24']:
+        # for date in ['28_03_24', '30_04_24', '31_05_24', '28_06_24', '31_07_24']:
+        for date in ['28_06_24_v2', '30_04_24_v2', '28_03_24_v2', '31_05_24_v2', '31_07_24_v2']:  #['28_03_24', '30_04_24', '31_05_24', '28_06_24', '31_07_24']:
             real_df = pd.read_csv(f'../datasets/barchart ulsd/{date}_fixed.csv')
             # real_df = pd.read_csv('surface/cme_data.csv')
             # real_df = real_df[real_df['ttm'] == 0.458]
@@ -202,7 +207,10 @@ if __name__ == '__main__':
             # vol_df[['spot_strike_ratio', 'predicted_vol']].to_csv(f'vol_res/right-vol-{datetime.datetime.now()}.csv', index=False, float_format='%.4f')
 
             whole = pd.concat([vol_df, vol_df_right], ignore_index=True)
-            whole.to_csv(f'surface/{date}.csv', index=False, float_format='%.4f')
+            if convex:
+                whole.to_csv(f'surface/convex_{date}.csv', index=False, float_format='%.4f')
+            else:
+                whole.to_csv(f'surface/{date}.csv', index=False, float_format='%.4f')
             # whole.to_csv(f'surface/cme_data_v4.csv', index=False, float_format='%.4f')
 
     if TASK == 'vol':
