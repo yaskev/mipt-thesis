@@ -161,16 +161,19 @@ class DoubleNetPricer:
 
 if __name__ == '__main__':
     # TASK = 'vol'
-    TASK = 'price'
-    # TASK = 'real'
+    # TASK = 'price'
+    TASK = 'real'
     # TASK = 'convex_price'
     # TASK = 'none'
 
-    left_model = joblib.load('convex/models/left-2024-03-08 00:22:27.197058.sav')
-    right_model = joblib.load('convex/models/right-2024-03-08 00:43:26.658967.sav')
-    convex = True
+    # left_model = joblib.load('convex/models/left-2024-03-08 00:22:27.197058.sav')
+    # right_model = joblib.load('convex/models/right-2024-03-08 00:43:26.658967.sav')
 
-    pricer = DoubleNetPricer(None, None, convex=convex)
+    left_model = joblib.load('models/left-2024-03-07 17:04:46.667532.sav')
+    right_model = joblib.load('models/right-2024-03-07 16:34:26.889750.sav')
+    convex = False
+
+    pricer = DoubleNetPricer(left_model, right_model, convex=convex)
 
     # real_df = pd.read_csv('../datasets/barchart ulsd/31_07_24_fixed.csv')
     train_df = pd.read_csv('../datasets/double_pricer/train_4_ttm_003_to_053_20000_paths_5000.csv')
@@ -183,8 +186,9 @@ if __name__ == '__main__':
 
     if TASK == 'real':
         # for date in ['28_03_24', '30_04_24', '31_05_24', '28_06_24', '31_07_24']:
-        for date in ['28_06_24_v2', '30_04_24_v2', '28_03_24_v2', '31_05_24_v2', '31_07_24_v2']:  #['28_03_24', '30_04_24', '31_05_24', '28_06_24', '31_07_24']:
-            real_df = pd.read_csv(f'../datasets/barchart ulsd/{date}_fixed.csv')
+        # for date in ['28_06_24_v2', '30_04_24_v2', '28_03_24_v2', '31_05_24_v2', '31_07_24_v2']:
+        for date in ['28_06_24_v3', '30_04_24_v3', '28_03_24_v3', '31_05_24_v3', '31_07_24_v3']:
+            real_df = pd.read_csv(f'../datasets/barchart ulsd/from_22_03_24/{date}.csv')
             # real_df = pd.read_csv('surface/cme_data.csv')
             # real_df = real_df[real_df['ttm'] == 0.458]
             # real_df.sort_values('spot_strike_ratio', inplace=True)
