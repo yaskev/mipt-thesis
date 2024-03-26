@@ -185,11 +185,11 @@ if __name__ == '__main__':
     test_df = pd.read_csv('../datasets/double_pricer/test_2_ttm_003_to_053_20000_paths_1000.csv')
 
     if TASK == 'real':
-        # for date in ['28_03_24', '30_04_24', '31_05_24', '28_06_24', '31_07_24']:
+        for date in ['28_03_24', '30_04_24', '31_05_24', '28_06_24', '31_07_24']:
         # for date in ['28_06_24_v2', '30_04_24_v2', '28_03_24_v2', '31_05_24_v2', '31_07_24_v2']:
         # for date in ['28_06_24_v3', '30_04_24_v3', '28_03_24_v3', '31_05_24_v3', '31_07_24_v3']:
-        for date in ['28_06_24_v4', '30_04_24_v4', '28_03_24_v4', '31_05_24_v4', '31_07_24_v4']:
-            real_df = pd.read_csv(f'../datasets/barchart ulsd/from_26_03_24/{date}.csv')
+        # for date in ['28_06_24_v4', '30_04_24_v4', '28_03_24_v4', '31_05_24_v4', '31_07_24_v4']:
+            real_df = pd.read_csv(f'../datasets/barchart ulsd/from_6_03_24/{date}.csv')
             # real_df = pd.read_csv('surface/cme_data.csv')
             # real_df = real_df[real_df['ttm'] == 0.458]
             # real_df.sort_values('spot_strike_ratio', inplace=True)
