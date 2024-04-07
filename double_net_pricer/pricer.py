@@ -1,5 +1,6 @@
 import datetime
 import os
+import time
 import typing
 
 import joblib
@@ -8,7 +9,7 @@ import pandas as pd
 import torch
 
 from double_net_pricer.intrinsic import get_threshold, encode_right, decode_right, right_special_encode_decode, \
-    log_price_decode, log_price_encode
+    log_price_decode, log_price_encode, get_intrinsic_values_greeks
 from main import make_predicted_df
 from positive_network.network import OptionsNet as PositiveNet
 from semipositive_network.network import OptionsNet as SemiPositiveNet
@@ -115,6 +116,65 @@ class DoubleNetPricer:
 
         return pd.concat([left_df, right_df], ignore_index=True)
 
+    def get_greeks(self, df: pd.DataFrame):
+        original_left_df, original_right_df = self.split_for_left_and_right_net_df(df)
+
+        right_intr_greeks = get_intrinsic_values_greeks(original_right_df)
+
+        left_df = log_price_encode(original_left_df)
+        right_df = encode_right(original_right_df)
+
+        left_df_values = left_df[
+            ['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility']].astype(
+            np.float32).to_numpy()
+        left_df_target = left_df['price_strike_ratio'].astype(np.float32).to_numpy()
+        right_df_values = right_df[
+            ['spot_strike_ratio', 'ttm', 'risk_free_rate', 'volatility']].astype(
+            np.float32).to_numpy()
+        right_df_target = right_df['price_strike_ratio'].astype(np.float32).to_numpy()
+
+        left_prices = self.left_net.predict(left_df_values).detach().numpy()
+        right_prices = self.right_net.predict(right_df_values).detach().numpy()
+
+        left_log_greeks = self.left_net.get_greeks(left_df_values)
+        right_log_greeks = self.right_net.get_greeks(right_df_values)
+
+        greek_names = ['delta', 'vega', 'theta', 'rho']
+
+        left_answer_df = make_predicted_df(left_df_values, left_df_target, left_prices,
+                                           fixed_avg_type=OptionAvgType.ARITHMETIC)
+        right_answer_df = make_predicted_df(right_df_values, right_df_target, right_prices,
+                                            fixed_avg_type=OptionAvgType.ARITHMETIC)
+
+        right_answer_df = decode_right(right_answer_df)
+        left_answer_df = log_price_decode(left_answer_df)
+
+        # Get from dlogf/dx to df/dx
+        for greek in greek_names:
+            left_log_greeks.loc[:, greek] *= left_answer_df.loc[:, 'net_price']
+            # Left part Greeks are done here
+
+
+        # Greeks for the right part (with consideration of special encoding and intrinsic value Greeks)
+        right_log_greeks.loc[:, 'delta'] *= -right_answer_df.loc[:, 'net_price']
+        right_log_greeks.loc[:, 'vega'] *= right_answer_df.loc[:, 'net_price']
+        right_log_greeks.loc[:, 'theta'] *= right_answer_df.loc[:, 'net_price']
+        right_log_greeks.loc[:, 'rho'] *= -right_answer_df.loc[:, 'net_price']
+
+        for greek in greek_names:
+            right_log_greeks.loc[:, greek] += np.array(right_intr_greeks.loc[:, greek])
+
+        for greek in greek_names:
+            left_log_greeks[f'original_{greek}'] = np.array(original_left_df[f'{greek}_mc'])
+            right_log_greeks[f'original_{greek}'] = np.array(original_right_df[f'{greek}_mc'])
+
+            left_log_greeks[f'original_{greek}_left_ci'] = np.array(original_left_df[f'{greek}_mc_l_ci'])
+            right_log_greeks[f'original_{greek}_left_ci'] = np.array(original_right_df[f'{greek}_mc_l_ci'])
+            left_log_greeks[f'original_{greek}_right_ci'] = np.array(original_left_df[f'{greek}_mc_r_ci'])
+            right_log_greeks[f'original_{greek}_right_ci'] = np.array(original_right_df[f'{greek}_mc_r_ci'])
+
+        return left_log_greeks, right_log_greeks
+
 
     # First value: Time value increases w.r.t. moneyness
     # Second value: Time value decreases w.r.t. moneyness
@@ -162,26 +222,28 @@ class DoubleNetPricer:
 if __name__ == '__main__':
     # TASK = 'vol'
     # TASK = 'price'
-    TASK = 'real'
+    # TASK = 'real'
     # TASK = 'convex_price'
     # TASK = 'none'
+    TASK = 'greeks'
 
-    # left_model = joblib.load('convex/models/left-2024-03-08 00:22:27.197058.sav')
-    # right_model = joblib.load('convex/models/right-2024-03-08 00:43:26.658967.sav')
+    left_model = joblib.load('convex/models/left-2024-03-08 16:36:45.264273.sav')
+    right_model = joblib.load('convex/models/right-2024-03-08 17:18:26.183705.sav')
+    convex = True
 
-    left_model = joblib.load('models/left-2024-03-07 17:04:46.667532.sav')
-    right_model = joblib.load('models/right-2024-03-07 16:34:26.889750.sav')
-    convex = False
+    # left_model = joblib.load('models/left-2024-03-07 17:04:46.667532.sav')
+    # right_model = joblib.load('models/right-2024-03-07 16:34:26.889750.sav')
+    # convex = False
 
     pricer = DoubleNetPricer(left_model, right_model, convex=convex)
 
     # real_df = pd.read_csv('../datasets/barchart ulsd/31_07_24_fixed.csv')
     train_df = pd.read_csv('../datasets/double_pricer/train_4_ttm_003_to_053_20000_paths_5000.csv')
 
-    second_train_df = pd.read_csv('../datasets/double_pricer/train_5_ttm_003_to_053_20000_paths_5000.csv')
+    # second_train_df = pd.read_csv('../datasets/double_pricer/train_5_ttm_003_to_053_20000_paths_5000.csv')
     # extra_df = pd.read_csv('../datasets/double_pricer/train_1_20000_paths_5000.csv')
     # extra_df = extra_df[extra_df['ttm'] < 1]
-    train_df = pd.concat([train_df, second_train_df])
+    # train_df = pd.concat([train_df, second_train_df])
     test_df = pd.read_csv('../datasets/double_pricer/test_2_ttm_003_to_053_20000_paths_1000.csv')
 
     if TASK == 'real':
@@ -234,16 +296,15 @@ if __name__ == '__main__':
             ((vol_df["vol_left_ci"] - vol_df["vol_right_ci"]) ** 2).mean() ** 0.5))
 
     if TASK == 'price':
-        pricer.fit(train_df, test_df)
+        # pricer.fit(train_df, test_df)
 
-        df_test_left, df_test_right = pricer.predict_split(test_df)
         df_train_left, df_train_right = pricer.predict_split(train_df)
 
         print('Left RMSE: {:.2e}'.format(((df_train_left["monte_carlo_price"] - df_train_left["net_price"]) ** 2).mean() ** 0.5))
-        print('Left Val RMSE: {:.2e}'.format(((df_test_left["monte_carlo_price"] - df_test_left["net_price"]) ** 2).mean() ** 0.5))
-
+        # print('Left Val RMSE: {:.2e}'.format(((df_test_left["monte_carlo_price"] - df_test_left["net_price"]) ** 2).mean() ** 0.5))
+        #
         print('Right RMSE: {:.2e}'.format(((df_train_right["monte_carlo_price"] - df_train_right["net_price"]) ** 2).mean() ** 0.5))
-        print('Right Val RMSE: {:.2e}'.format(((df_test_right["monte_carlo_price"] - df_test_right["net_price"]) ** 2).mean() ** 0.5))
+        # print('Right Val RMSE: {:.2e}'.format(((df_test_right["monte_carlo_price"] - df_test_right["net_price"]) ** 2).mean() ** 0.5))
 
     if TASK == 'convex_price':
         # left_model = joblib.load('cmodels/left-2024-03-05 19:49:14.236234.sav')
@@ -268,3 +329,37 @@ if __name__ == '__main__':
             ((df_train_right["monte_carlo_price"] - df_train_right["net_price"]) ** 2).mean() ** 0.5))
         print(
             'Right Val RMSE: {:.2e}'.format(((df_test_right["monte_carlo_price"] - df_test_right["net_price"]) ** 2).mean() ** 0.5))
+
+    if TASK == 'greeks':
+        # test
+        df_for_greeks = pd.read_csv('../datasets/test/greeks_positive_50.csv')
+        # df_for_greeks = df_for_greeks.rename(columns={'monte_carlo_price': 'price_strike_ratio'})
+        #
+        # df_for_greeks = df_for_greeks[df_for_greeks['avg_type'] == 'ARITHMETIC']
+        #
+        # df_left_greeks, df_right_greeks = pricer.get_greeks(df_for_greeks)
+        #
+        # df_left_greeks.to_csv('left_greeks.csv', index=False, float_format='%.4f')
+        # df_right_greeks.to_csv('right_greeks.csv', index=False, float_format='%.4f')
+
+        # train
+        # df_for_greeks = pd.read_csv('../datasets/train/greeks_mc_with_ci.csv')
+        df_for_greeks = df_for_greeks.rename(columns={'monte_carlo_price': 'price_strike_ratio'})
+
+        df_for_greeks = df_for_greeks[df_for_greeks['avg_type'] == 'ARITHMETIC']
+
+
+        # times = []
+        # for _ in range(50):
+        #     start = time.process_time()
+        #     df_left_greeks, df_right_greeks = pricer.get_greeks(df_for_greeks)
+        #     times.append(time.process_time() - start)
+        # print(np.array(times).mean())
+
+        df_left_greeks, df_right_greeks = pricer.get_greeks(df_for_greeks)
+
+
+        df_left_greeks.to_csv('left_greeks_convex.csv', index=False, float_format='%.4f')
+        df_right_greeks.to_csv('right_greeks_convex.csv', index=False, float_format='%.4f')
+
+

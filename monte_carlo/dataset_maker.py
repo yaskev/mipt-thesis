@@ -38,11 +38,19 @@ def create_dataset(entries_cnt: int) -> pd.DataFrame:
     #     'avg_type': [OptionAvgType.ARITHMETIC.value for _ in range(entries_cnt)],
     # }
 
+    # data = {
+    #     'spot_strike_ratio': 0.7 + rng.random(entries_cnt) * 0.6,
+    #     'ttm': 0.03 + rng.random(entries_cnt) * 0.5,
+    #     'risk_free_rate': 0 + rng.random(entries_cnt) * 0.15,
+    #     'volatility': 0.05 + rng.random(entries_cnt) * 0.6,
+    #     'avg_type': [OptionAvgType.ARITHMETIC.value for _ in range(entries_cnt)],
+    # }
+
     data = {
-        'spot_strike_ratio': 0.7 + rng.random(entries_cnt) * 0.6,
-        'ttm': 0.03 + rng.random(entries_cnt) * 0.5,
-        'risk_free_rate': 0 + rng.random(entries_cnt) * 0.15,
-        'volatility': 0.05 + rng.random(entries_cnt) * 0.6,
+        'spot_strike_ratio': 0.5 + rng.random(entries_cnt) * 1,
+        'ttm': 0.5 + rng.random(entries_cnt) * 1,
+        'risk_free_rate': 0 + rng.random(entries_cnt) * 0.2,
+        'volatility': 0.05 + rng.random(entries_cnt) * 0.45,
         'avg_type': [OptionAvgType.ARITHMETIC.value for _ in range(entries_cnt)],
     }
 

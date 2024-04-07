@@ -6,6 +6,7 @@ import joblib
 import torch
 
 import preprocessing.intrinsic_val
+import settings
 from monte_carlo import create_dataset
 from monte_carlo.greeks import get_greeks
 from monte_carlo.path_generator import plot_paths
@@ -102,7 +103,7 @@ def main():
     else:
         df = create_dataset(DATASET_SIZE)
         # test_df = df
-        df.to_csv('test_5_ttm_003_to_053_20000_paths_1000.csv', index=False, float_format='%.4f')
+        df.to_csv(f'calc_ci_{settings.NUMBER_OF_PATHS}_paths_1000.csv', index=False, float_format='%.4f')
         return
 
     if PLOT_SOME_PATHS:

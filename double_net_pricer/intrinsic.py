@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 
@@ -15,6 +17,34 @@ def add_subtracted_intrinsic_value(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def get_intrinsic_values_greeks(df: pd.DataFrame) -> pd.DataFrame:
+    # assumed only right part is passed here
+    intr_greeks = df.apply(_get_one_intrinsic_value_greeks, axis=1, result_type='expand')
+    intr_greeks.columns = ['delta', 'vega', 'theta', 'rho']
+
+    return intr_greeks
+
+def _get_one_intrinsic_value_greeks(row) -> Tuple[float, float, float, float]:
+    # assumed only right part is passed here
+    delta = (discount_factors ** (row.risk_free_rate * row.ttm)).mean()
+
+    vega = 0
+
+    # Minus is already in the formula
+    theta = (
+        row.spot_strike_ratio * row.risk_free_rate / (N ** 2) *
+        (discount_factors ** (row.risk_free_rate * row.ttm) * np.arange(0, N + 1)).mean() -
+         row.risk_free_rate * np.exp(-row.risk_free_rate * row.ttm)
+    )
+
+    rho = (
+        -(row.spot_strike_ratio * row.ttm / (N ** 2)) *
+        (discount_factors ** (row.risk_free_rate * row.ttm) * np.arange(0, N + 1)).mean() +
+        row.ttm * np.exp(-row.risk_free_rate * row.ttm)
+    )
+
+    # delta, vega, theta, rho
+    return delta, vega, theta, rho
 
 def _get_intrinsic_value(row) -> float:
     intrinsic_val = row.spot_strike_ratio * (discount_factors ** (row.risk_free_rate * row.ttm)).mean()\
